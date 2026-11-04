@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#eaf6ff">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Supermercado XYZ | Portal do cliente</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>window.lucide = window.lucide || { createIcons: function () {} };</script>
+    <script>if (localStorage.getItem('gelo-theme') === 'dark') document.documentElement.classList.add('dark-theme');</script>
+    <script src="auth.js"></script>
+    <script>NexusAuth.requireAuth(['admin', 'client']);</script>
+    <script src="operations.js"></script>
+    <style>
+        :root { --ink:#0b2233; --muted:#4f6b7b; --line:rgba(67,116,143,.3); --blue:#0d65b5; --cyan:#21a9d2; --green:#258d61; --orange:#c27b10; }
+        * { box-sizing:border-box; } html.dark-theme { --ink:#e5f3fb; --muted:#9bb4c4; --line:rgba(157,201,222,.2); }
+        body { margin:0; min-height:100vh; color:var(--ink); font-family:'DM Sans',sans-serif; background:#f6fbff; background-image:radial-gradient(circle at 12% 12%,rgba(118,213,239,.22),transparent 27%),radial-gradient(circle at 86% 84%,rgba(37,119,212,.13),transparent 30%),linear-gradient(135deg,#fafeff 0%,#edf7fc 48%,#f6fbff 100%); transition:color .35s ease,background .35s ease; }
+        html.dark-theme body { background:#0d1d2a; background-image:radial-gradient(circle at 12% 12%,rgba(22,116,169,.24),transparent 27%),radial-gradient(circle at 86% 84%,rgba(20,80,142,.22),transparent 30%),linear-gradient(135deg,#102635 0%,#0d1d2a 52%,#122c3b 100%); }
+        .shell { min-height:100vh; padding:34px clamp(20px,6vw,96px) 54px; } .topbar,.content { max-width:1180px; margin:0 auto; position:relative; z-index:1; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; } .brand { display:flex; align-items:center; gap:11px; font:700 22px 'Space Grotesk',sans-serif; letter-spacing:-.05em; }
+        .brand-mark { width:31px; height:31px; display:grid; place-items:center; color:#fff; background:linear-gradient(145deg,#29b9ec,#146bc5); border-radius:10px; } .brand-mark svg{width:17px;}
+        .nav { display:flex; align-items:center; gap:16px; } .theme-toggle { width:35px;height:35px;display:grid;place-items:center;color:var(--ink);background:rgba(255,255,255,.62);border:1px solid var(--line);border-radius:10px;cursor:pointer; } .theme-toggle svg{width:16px;} html.dark-theme .theme-toggle{background:rgba(26,56,72,.78);}
+        .back-link { display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;text-decoration:none; } .back-link:hover{color:var(--blue);} .back-link svg{width:16px;}
+        .content { margin-top:62px; } .intro { display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:30px; } .eyebrow{margin:0 0 10px;color:#086b9d;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;} h1{margin:0;font:700 clamp(34px,5vw,58px)/1 'Space Grotesk',sans-serif;letter-spacing:-.075em;} .intro-copy{max-width:350px;margin:0;color:var(--muted);font-size:14px;line-height:1.6;}
+        .client-tag{display:inline-flex;align-items:center;gap:7px;margin-top:13px;color:var(--green);font-size:11px;font-weight:700;} .client-tag svg{width:15px;}
+        .layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;} .panel{padding:21px;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.9);border-radius:15px;box-shadow:0 12px 24px rgba(80,139,171,.09);backdrop-filter:blur(13px);} html.dark-theme .panel{background:rgba(20,45,59,.78);border-color:rgba(137,190,214,.16);}
+        .panel-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;} .panel-title h2{margin:0;font:600 17px 'Space Grotesk',sans-serif;} .panel-title span{color:var(--muted);font-size:10px;}
+        .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;} .stat{padding:15px;background:rgba(232,246,252,.76);border-radius:10px;} html.dark-theme .stat{background:rgba(14,37,50,.75);} .stat span{color:var(--muted);font-size:10px;} .stat strong{display:block;margin-top:8px;font:700 24px 'Space Grotesk',sans-serif;}
+        .order-card{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:14px 0;border-top:1px solid var(--line);} .order-main{display:flex;align-items:center;gap:10px;} .order-icon,.qr-icon{width:34px;height:34px;display:grid;place-items:center;color:var(--blue);background:#d9f1fc;border-radius:9px;} .order-icon svg,.qr-icon svg{width:17px;} .order-main strong{display:block;font-size:12px;} .order-main span{color:var(--muted);font-size:10px;} .pill{padding:5px 8px;border-radius:20px;font-size:9px;font-weight:700;white-space:nowrap;} .pill.orange{color:#895b05;background:#ffedbf;} .pill.blue{color:#145f9d;background:#dceefa;} .pill.green{color:#176b49;background:#d9f3e6;}
+        .progress-row{margin-bottom:20px;} .progress-label{display:flex;justify-content:space-between;margin-bottom:7px;color:var(--muted);font-size:11px;} .progress-label strong{color:var(--ink);} .bar{height:8px;overflow:hidden;background:#dfedf3;border-radius:10px;} .bar i{display:block;height:100%;background:var(--cyan);border-radius:inherit;}
+        .equipment{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(232,246,252,.76);border-radius:10px;} html.dark-theme .equipment{background:rgba(14,37,50,.75);} .equipment-icon{width:38px;height:38px;display:grid;place-items:center;color:var(--blue);background:#d9f1fc;border-radius:10px;} .equipment-icon svg{width:19px;} .equipment strong{display:block;font-size:13px;} .equipment span{display:block;margin-top:3px;color:var(--muted);font-size:10px;}
+        .qr-box{display:flex;align-items:center;gap:14px;padding:16px;background:#f7fbfd;border:1px dashed #91c9dc;border-radius:11px;} html.dark-theme .qr-box{background:#102a39;} .qr-code{width:66px;height:66px;display:grid;place-items:center;color:var(--ink);background:#fff;border:7px solid #fff;} .qr-code svg{width:52px;height:52px;} .qr-box strong{display:block;font-size:13px;} .qr-box p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.45;}
+        .notice{display:flex;gap:10px;margin-top:18px;padding:13px;color:var(--ink);background:#e5f7ef;border:1px solid #b6e6cf;border-radius:10px;animation:rise .5s ease both;} .notice svg{width:17px;color:var(--green);flex:none;} .notice strong{display:block;font-size:11px;} .notice span{display:block;margin-top:3px;color:#39765b;font-size:10px;}
+        .delivery-notice { align-items: start; gap: 11px; }
+        .delivery-notice > svg { width: 20px; margin-top: 1px; }
+        .delivery-notice small { display: block; margin-top: 7px; color: var(--green); font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+        .delivery-progress { height: 5px; margin-top: 9px; overflow: hidden; background: rgba(37,141,97,.15); border-radius: 10px; }
+        .delivery-progress i { display: block; width: 68%; height: 100%; background: linear-gradient(90deg, #21a9d2, #258d61); border-radius: inherit; animation: delivery-progress 2.4s ease-in-out infinite alternate; }
+        .delivery-notice.waiting { background: #fff7e5; border-color: #f0d394; }
+        .delivery-notice.waiting > svg, .delivery-notice.waiting small { color: var(--orange); }
+        .delivery-notice.waiting .delivery-progress { display: none; }
+        .client-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+        .client-action { display: inline-flex; align-items: center; gap: 7px; padding: 9px 11px; color: var(--blue); background: rgba(255,255,255,.64); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; font: 700 10px 'DM Sans',sans-serif; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+        .client-action:hover { transform: translateY(-2px); border-color: #86c9db; background: #fff; }
+        .client-action svg { width: 14px; }
+        .live-pulse { animation: live-pulse .6s ease; }
+        .client-toast { position: fixed; right: 24px; bottom: 24px; z-index: 5; display: flex; align-items: center; gap: 10px; min-width: 250px; max-width: min(360px, calc(100vw - 36px)); padding: 13px 15px; color: var(--ink); background: rgba(255,255,255,.94); border: 1px solid #b9dfdf; border-left: 4px solid var(--cyan); border-radius: 9px; box-shadow: 0 15px 35px rgba(17,40,60,.2); opacity: 0; transform: translateY(16px); pointer-events: none; transition: opacity .25s ease, transform .25s ease; }
+        .client-toast.show { opacity: 1; transform: translateY(0); }
+        .client-toast svg { width: 17px; color: var(--cyan); flex: none; }
+        .client-toast strong { display: block; font-size: 11px; } .client-toast span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+        .history-button { padding: 0; color: var(--blue); background: transparent; border: 0; cursor: pointer; font: 700 10px 'DM Sans',sans-serif; }
+        .history-button:hover { color: var(--cyan); text-decoration: underline; }
+        .history-modal { position: fixed; inset: 0; z-index: 6; display: none; place-items: center; padding: 20px; background: rgba(9,31,42,.46); backdrop-filter: blur(5px); }
+        .history-modal.open { display: grid; }
+        .history-box { width: min(100%, 430px); padding: 22px; color: var(--ink); background: var(--surface, #fff); border: 1px solid rgba(255,255,255,.78); border-radius: 14px; box-shadow: 0 24px 60px rgba(8,39,52,.25); }
+        .history-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+        .history-head h2 { margin: 0; font: 600 18px 'Space Grotesk',sans-serif; }
+        .history-close { color: var(--muted); background: transparent; border: 0; cursor: pointer; }
+        .history-close svg { width: 18px; }
+        .history-list { display: grid; gap: 11px; }
+        .history-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px; background: var(--surface-soft, #f1f8fa); border-radius: 8px; }
+        .history-item strong { display: block; font-size: 11px; } .history-item span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+        .history-sync { margin: 15px 0 0; color: var(--muted); font-size: 10px; }
+        html.dark-theme .client-action { background: rgba(26,56,72,.78); } html.dark-theme .client-action:hover { background: #173343; } html.dark-theme .client-toast { background: rgba(23,51,67,.96); }
+        html.dark-theme .history-box { background: #173343; } html.dark-theme .history-item { background: #102a39; }
+        .footer-note{margin-top:28px;color:var(--muted);font-size:10px;text-align:right;} @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes live-pulse { 50% { box-shadow: 0 0 0 5px rgba(20,184,201,.15); } }
+        @keyframes delivery-progress { from { width: 58%; } to { width: 82%; } }
+        @media(max-width:780px){.shell{padding:24px 18px 38px}.content{margin-top:50px}.intro{display:block}.intro-copy{margin-top:16px}.layout{grid-template-columns:1fr}.nav .back-link span{display:none;}}
+        @media(max-width:480px){.stats{grid-template-columns:1fr 1fr}.order-card{align-items:start;flex-direction:column;gap:9px}.order-card .pill{margin-left:44px;}}
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="shell"><header class="topbar"><div class="brand"><span class="brand-mark"><i data-lucide="store"></i></span>Supermercado XYZ</div><nav class="nav"><span class="auth-user" data-auth-name>Cliente</span><button class="theme-toggle" type="button" title="Ativar modo escuro" aria-label="Ativar modo escuro"><i data-lucide="moon"></i></button><button class="exit-system" data-logout type="button" title="Sair do sistema" aria-label="Sair do sistema"><i data-lucide="log-out"></i></button><a class="back-link" data-admin-only href="index.html"><i data-lucide="arrow-left"></i><span>Visão geral</span></a></nav></header>
+    <section class="content" aria-label="Portal do cliente Supermercado XYZ"><div class="intro"><div><p class="eyebrow">Portal do cliente · Volta Redonda, RJ</p><h1>Seu gelo, sempre sob controle.</h1><div class="client-tag"><i data-lucide="radio"></i> Conectado à Central Gelo</div></div><p class="intro-copy">Acompanhe pedidos, estoque e entregas em tempo real. O equipamento em comodato envia informações direto para a central.</p></div><div class="layout"><section class="panel"><div class="panel-title"><h2>Resumo da operação</h2><span>Hoje, 24 ago</span></div><div class="stats"><div class="stat"><span>Pedidos no mês</span><strong>18</strong></div><div class="stat"><span>Sacos disponíveis</span><strong>2.450</strong></div><div class="stat"><span>Próxima entrega</span><strong>Hoje</strong></div></div><div class="panel-title"><h2>Pedidos recentes</h2><span>ver histórico</span></div><div class="order-card"><div class="order-main"><span class="order-icon"><i data-lucide="package"></i></span><div><strong>Pedido #1025</strong><span>50 sacos · criado às 09:32</span></div></div><span class="pill orange">EM PRODUÇÃO</span></div><div class="order-card"><div class="order-main"><span class="order-icon"><i data-lucide="truck"></i></span><div><strong>Pedido #1024</strong><span>120 sacos · previsão 14:30</span></div></div><span class="pill blue">EM ROTA</span></div><div class="order-card"><div class="order-main"><span class="order-icon"><i data-lucide="package-check"></i></span><div><strong>Pedido #1023</strong><span>30 sacos · entregue hoje</span></div></div><span class="pill green">ENTREGUE</span></div></section><aside class="panel"><div class="panel-title"><h2>Estoque de gelo</h2><span>atualizado agora</span></div><div class="progress-row"><div class="progress-label"><span>Gelo de qualidade</span><strong>72%</strong></div><div class="bar"><i style="width:72%"></i></div></div><div class="progress-row"><div class="progress-label"><span>Reserva de segurança</span><strong>91%</strong></div><div class="bar"><i style="width:91%"></i></div></div><div class="panel-title" style="margin-top:28px"><h2>Equipamento em comodato</h2><span>ativo</span></div><div class="equipment"><span class="equipment-icon"><i data-lucide="box"></i></span><div><strong>Freezer #045</strong><span>Funcionando · última leitura há 2 min</span></div></div><div class="panel-title" style="margin-top:24px"><h2>Identificação digital</h2></div><div class="qr-box"><div class="qr-code"><i data-lucide="qr-code"></i></div><div><strong>Leia o QR Code</strong><p>Use a identificação do equipamento para enviar informações à Central Gelo.</p></div></div><div class="notice"><i data-lucide="check-circle-2"></i><div><strong>Próxima entrega confirmada</strong><span>Pedido #1024 chega hoje às 14:30.</span></div></div></aside></div></section><p class="footer-note">Supermercado XYZ · Cliente conectado à Central Gelo</p></main>
+    <div class="client-toast" id="client-toast" role="status" aria-live="polite"><i data-lucide="radio"></i><div><strong id="client-toast-title"></strong><span id="client-toast-message"></span></div></div>
+    <script>
+        lucide.createIcons();
+        var digitalIdentification = document.querySelector('.qr-box');
+        if (digitalIdentification) { digitalIdentification.previousElementSibling.remove(); digitalIdentification.remove(); }
+        var equipmentBlock = document.querySelector('.equipment');
+        if (equipmentBlock) { equipmentBlock.previousElementSibling.remove(); equipmentBlock.remove(); }
+        document.querySelector('.intro-copy').textContent = 'Acompanhe pedidos, estoque e entregas em tempo real, com tudo conectado diretamente à Central Gelo.';
+        var themeToggle = document.querySelector('.theme-toggle');
+        function updateThemeButton() { var dark = document.documentElement.classList.contains('dark-theme'); themeToggle.title = dark ? 'Ativar modo claro' : 'Ativar modo escuro'; themeToggle.setAttribute('aria-label', themeToggle.title); themeToggle.innerHTML = '<i data-lucide="' + (dark ? 'sun' : 'moon') + '"></i>'; lucide.createIcons(); }
+        updateThemeButton();
+        themeToggle.addEventListener('click', function () { document.documentElement.classList.toggle('dark-theme'); localStorage.setItem('gelo-theme', document.documentElement.classList.contains('dark-theme') ? 'dark' : 'light'); updateThemeButton(); });
+        var Ops = window.NexusOperations;
+        var toast = document.getElementById('client-toast');
+        var toastTimer;
+        var centralStateKey = 'central-gelo-state';
+        var centralBus = Ops.createStateBus(centralStateKey);
+        var rawCentralState = centralBus.read();
+        var centralState = Ops.prepareState(rawCentralState);
+        if (!Array.isArray(rawCentralState.recentOrders) || Number(rawCentralState.schemaVersion) !== 2) centralState = centralBus.publish(centralState);
+        var previousStatuses = {};
+        function showClientToast(title, message) { document.getElementById('client-toast-title').textContent = title; document.getElementById('client-toast-message').textContent = message; toast.classList.add('show'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(function () { toast.classList.remove('show'); }, 3600); }
+        function pulse(element) { element.classList.remove('live-pulse'); window.requestAnimationFrame(function () { element.classList.add('live-pulse'); }); }
+        function clientOrders(state) { return Ops.ordersForClient(state && state.recentOrders, Ops.CLIENT_NAME); }
+        function updateStats() {
+            var queue = clientOrders(centralState);
+            var counts = Ops.countOrders(queue);
+            var routeOrder = Ops.oldestByStatus(queue, 'route');
+            var separatingOrder = Ops.oldestByStatus(queue, 'separating');
+            var productionOrder = Ops.oldestByStatus(queue, 'production');
+            document.querySelector('.stats .stat:nth-child(1) span').textContent = 'Pedidos ativos';
+            document.querySelector('.stats .stat:nth-child(1) strong').textContent = counts.open;
+            document.querySelector('.stats .stat:nth-child(2) strong').textContent = (Number(centralState.clientStock) || 0).toLocaleString('pt-BR');
+            document.querySelector('.stats .stat:nth-child(3) span').textContent = 'Próxima etapa';
+            document.querySelector('.stats .stat:nth-child(3) strong').textContent = routeOrder ? 'Em rota' : separatingOrder ? 'Separando' : productionOrder ? 'Produção' : queue.length ? 'Concluída' : 'Aguardando';
+        }
+        function renderStock() {
+            var rows = document.querySelectorAll('.progress-row');
+            var clientPercent = Math.round(Math.min(100, Math.max(0, (Number(centralState.clientStock) || 0) / 3500 * 100)));
+            var centralPercent = Math.round(Math.min(100, Math.max(0, Number(centralState.stockPercent) || 0)));
+            if (rows[0]) { rows[0].querySelector('.progress-label span').textContent = 'Estoque no Supermercado'; rows[0].querySelector('.progress-label strong').textContent = clientPercent + '%'; rows[0].querySelector('.bar i').style.width = clientPercent + '%'; }
+            if (rows[1]) { rows[1].querySelector('.progress-label span').textContent = 'Estoque na Central'; rows[1].querySelector('.progress-label strong').textContent = centralPercent + '%'; rows[1].querySelector('.bar i').style.width = centralPercent + '%'; }
+            var syncLabel = document.querySelector('.layout aside .panel-title span');
+            if (syncLabel) syncLabel.textContent = 'sincronizado agora';
+        }
+        var deliveryNotice = document.querySelector('.notice');
+        function renderDeliveryStatus() {
+            var queue = clientOrders(centralState);
+            var routeOrder = Ops.oldestByStatus(queue, 'route');
+            var separatingOrder = Ops.oldestByStatus(queue, 'separating');
+            var productionOrder = Ops.oldestByStatus(queue, 'production');
+            var deliveredOrder = queue.filter(function (order) { return order.status === 'delivered'; }).sort(function (a, b) { return (b.deliveredAt || b.statusChangedAt) - (a.deliveredAt || a.statusChangedAt); })[0] || null;
+            var activeOrder = routeOrder || separatingOrder || productionOrder;
+            var waiting = !routeOrder;
+            var icon = routeOrder ? 'truck' : activeOrder ? 'clock-3' : deliveredOrder ? 'package-check' : 'circle-dashed';
+            var title = routeOrder ? 'Entrega em rota' : separatingOrder ? 'Pedido em separação' : productionOrder ? 'Produção do pedido em andamento' : deliveredOrder ? 'Última entrega concluída' : 'Nenhum pedido em andamento';
+            var detailOrder = activeOrder || deliveredOrder;
+            var description = detailOrder ? 'Pedido #' + detailOrder.id + ' · ' + detailOrder.quantity + ' sacos.' : 'Solicite uma reposição para iniciar o fluxo.';
+            var footer = routeOrder ? 'Central Gelo · motorista em rota' : activeOrder ? 'Central Gelo · status atualizado automaticamente' : deliveredOrder ? 'Estoque do supermercado atualizado na entrega' : 'Central Gelo · aguardando solicitação';
+            deliveryNotice.className = 'notice delivery-notice' + (waiting ? ' waiting' : '');
+            deliveryNotice.innerHTML = '<i data-lucide="' + icon + '"></i><div><strong>' + title + '</strong><span>' + description + '</span>' + (routeOrder ? '<div class="delivery-progress"><i></i></div>' : '') + '<small>' + footer + '</small></div>';
+            lucide.createIcons();
+        }
+        var recentOrders = document.querySelectorAll('.order-card');
+        function updateRecentOrders(state) {
+            var visibleOrders = clientOrders(state).slice(0, 3);
+            recentOrders.forEach(function (card, index) {
+                card.style.display = visibleOrders[index] ? 'flex' : 'none';
+                if (!visibleOrders[index]) return;
+                var order = visibleOrders[index];
+                var statusDetails = { production: ['recebido agora', 'EM PRODUÇÃO', 'orange', 'shopping-cart'], separating: ['separação iniciada', 'SEPARANDO', 'blue', 'package'], route: ['motorista em rota', 'EM ROTA', 'blue', 'truck'], delivered: ['entregue com sucesso', 'ENTREGUE', 'green', 'package-check'] };
+                var details = statusDetails[order.status] || statusDetails.production;
+                card.querySelector('strong').textContent = 'Pedido #' + order.id;
+                card.querySelector('.order-main span').innerHTML = '<i data-lucide="' + details[3] + '"></i>';
+                card.querySelector('.order-main > div > span').textContent = order.quantity + ' sacos · ' + details[0];
+                var status = card.querySelector('.pill');
+                status.className = 'pill ' + details[2];
+                status.textContent = details[1];
+            });
+            lucide.createIcons();
+        }
+        var stats = document.querySelector('.stats');
+        stats.insertAdjacentHTML('afterend', '<div class="client-actions"><button class="client-action" id="new-order" type="button"><i data-lucide="plus"></i> Solicitar reposição</button><button class="client-action" id="refresh-client" type="button"><i data-lucide="refresh-cw"></i> Atualizar dados</button></div>');
+        var historyButton = document.querySelectorAll('.panel-title span')[1];
+        historyButton.outerHTML = '<button class="history-button" id="open-history" type="button">VER HISTÓRICO</button>';
+        document.body.insertAdjacentHTML('beforeend', '<div class="history-modal" id="history-modal" role="dialog" aria-modal="true" aria-labelledby="history-title"><div class="history-box"><div class="history-head"><h2 id="history-title">Histórico de pedidos</h2><button class="history-close" id="close-history" type="button" aria-label="Fechar histórico"><i data-lucide="x"></i></button></div><div class="history-list"><div class="history-item"><div><strong>Pedido #1025</strong><span>50 sacos · hoje às 09:32</span></div><span class="pill orange">EM PRODUÇÃO</span></div><div class="history-item"><div><strong>Pedido #1024</strong><span>120 sacos · previsão 14:30</span></div><span class="pill blue">EM ROTA</span></div><div class="history-item"><div><strong>Pedido #1023</strong><span>30 sacos · entregue hoje</span></div><span class="pill green">ENTREGUE</span></div></div><p class="history-sync">Pedidos acompanhados pela Central Gelo em tempo real.</p></div></div>');
+        function updateHistoryOrders(state) {
+            var visibleOrders = clientOrders(state).slice(0, 3);
+            var historyItems = document.querySelectorAll('.history-item');
+            historyItems.forEach(function (item) { item.style.display = 'none'; });
+            visibleOrders.forEach(function (order, index) {
+                var item = historyItems[index];
+                if (!item) return;
+                item.style.display = 'flex';
+                item.querySelector('strong').textContent = 'Pedido #' + order.id;
+                item.querySelector('div > span').textContent = order.quantity + ' sacos · acompanhamento Central Gelo';
+                var pill = item.querySelector('.pill');
+                var labels = { production: ['EM PRODUÇÃO', 'orange'], separating: ['SEPARANDO', 'blue'], route: ['EM ROTA', 'blue'], delivered: ['ENTREGUE', 'green'] };
+                var status = labels[order.status] || labels.production;
+                pill.className = 'pill ' + status[1];
+                pill.textContent = status[0];
+            });
+        }
+        function announceStatusChanges(nextState) {
+            var changedDelivery = null;
+            var changedRoute = null;
+            clientOrders(nextState).forEach(function (order) {
+                var identity = order.uid || 'id:' + order.id;
+                if (previousStatuses[identity] && previousStatuses[identity] !== order.status) {
+                    if (order.status === 'delivered') changedDelivery = order;
+                    else if (order.status === 'route') changedRoute = order;
+                }
+            });
+            if (changedDelivery) showClientToast('Produto entregue com sucesso', 'O pedido #' + changedDelivery.id + ' foi concluído e entrou no estoque do supermercado.');
+            else if (changedRoute) showClientToast('Pedido em rota', 'O pedido #' + changedRoute.id + ' saiu da Central Gelo para o Supermercado XYZ.');
+        }
+        function rememberStatuses(state) {
+            previousStatuses = {};
+            clientOrders(state).forEach(function (order) { previousStatuses[order.uid || 'id:' + order.id] = order.status; });
+        }
+        function updateFromCentralState(nextState, announce) {
+            if (!nextState) return;
+            var prepared = Ops.prepareState(nextState);
+            var currentReset = Number(centralState.resetAt) || 0;
+            var incomingReset = Number(prepared.resetAt) || 0;
+            if (incomingReset < currentReset) return;
+            var wasReset = incomingReset > currentReset;
+            var incomingRevision = Number(prepared.revision) || 0;
+            var currentRevision = Number(centralState.revision) || 0;
+            if (!wasReset) {
+                var mergedOrders = Ops.mergeOrders(centralState.recentOrders, prepared.recentOrders);
+                if (incomingRevision < currentRevision) prepared = Object.assign({}, centralState, { recentOrders: mergedOrders });
+                else prepared = Object.assign({}, prepared, {
+                    recentOrders: mergedOrders,
+                    production: Math.max(Number(centralState.production) || 0, Number(prepared.production) || 0),
+                    clientStock: Math.max(Number(centralState.clientStock) || 0, Number(prepared.clientStock) || 0),
+                    revenueValue: Math.max(Number(centralState.revenueValue) || 0, Number(prepared.revenueValue) || 0),
+                    simulationStep: Math.max(Number(centralState.simulationStep) || 0, Number(prepared.simulationStep) || 0)
+                });
+            }
+            prepared = Ops.prepareState(prepared);
+            if (announce) announceStatusChanges(prepared);
+            centralState = prepared;
+            updateStats();
+            renderStock();
+            renderDeliveryStatus();
+            updateRecentOrders(centralState);
+            updateHistoryOrders(centralState);
+            rememberStatuses(centralState);
+            if (announce && wasReset && !centralState.recentOrders.length) showClientToast('Dados resetados', 'O portal foi zerado junto com a Central Gelo.');
+        }
+        centralBus.subscribe(function (state) { updateFromCentralState(state, true); });
+        document.getElementById('new-order').addEventListener('click', function () {
+            var fresh = Ops.prepareState(centralBus.read());
+            var freshReset = Number(fresh.resetAt) || 0;
+            var currentReset = Number(centralState.resetAt) || 0;
+            if (freshReset > currentReset) centralState = fresh;
+            else if (freshReset < currentReset) fresh = centralState;
+            var allOrders = freshReset === currentReset ? Ops.mergeOrders(fresh.recentOrders, centralState.recentOrders) : Ops.normalizeOrders(fresh.recentOrders);
+            var nextId = Ops.nextOrderId(allOrders, fresh.nextOrderId || fresh.orderNumber);
+            var generatedOrder = { id: nextId, uid: Ops.createOrderUid('client'), quantity: 50, status: 'production', client: Ops.CLIENT_NAME, createdAt: Date.now(), statusChangedAt: Date.now() };
+            allOrders = Ops.mergeOrders(allOrders, [generatedOrder]);
+            generatedOrder = allOrders.find(function (order) { return order.uid === generatedOrder.uid; }) || generatedOrder;
+            var counts = Ops.countOrders(allOrders);
+            var followingId = Ops.nextOrderId(allOrders, generatedOrder.id + 1);
+            var payload = Object.assign({}, fresh, {
+                recentOrders: allOrders,
+                openOrders: counts.open,
+                totalOrders: counts.total,
+                deliveries: counts.route,
+                nextOrderId: followingId,
+                orderNumber: followingId,
+                revenueValue: Math.max(Number(fresh.revenueValue) || 0, Number(centralState.revenueValue) || 0) + 250,
+                lastEvent: 'new-order',
+                lastEventOrder: generatedOrder.id
+            });
+            centralState = centralBus.publish(payload);
+            updateFromCentralState(centralState, false);
+            pulse(stats);
+            showClientToast('Pedido enviado à Central Gelo', 'O pedido #' + generatedOrder.id + ' foi registrado sem alterar o estoque antes da entrega.');
+        });
+        document.getElementById('refresh-client').addEventListener('click', function () { updateFromCentralState(centralBus.read(), false); pulse(document.querySelector('.panel')); showClientToast('Dados atualizados', 'Estoque, pedidos e rota foram sincronizados agora.'); });
+        lucide.createIcons();
+        document.getElementById('open-history').addEventListener('click', function () { document.getElementById('history-modal').classList.add('open'); });
+        document.getElementById('close-history').addEventListener('click', function () { document.getElementById('history-modal').classList.remove('open'); });
+        document.getElementById('history-modal').addEventListener('click', function (event) { if (event.target.id === 'history-modal') event.currentTarget.classList.remove('open'); });
+        document.querySelectorAll('.order-card').forEach(function (card) { card.addEventListener('click', function () { pulse(card); showClientToast('Pedido acompanhado', card.querySelector('strong').textContent + ' está com status atualizado.'); }); });
+        updateFromCentralState(centralState, false);
+        window.setInterval(function () { var latest = centralBus.read(); if (Number(latest.resetAt) !== Number(centralState.resetAt) || Number(latest.revision) !== Number(centralState.revision) || latest.mutationId !== centralState.mutationId) updateFromCentralState(latest, true); }, 5000);
+    </script>
+</body>
+</html>

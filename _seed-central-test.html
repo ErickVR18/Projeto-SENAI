@@ -1,0 +1,27 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Seed central test</title>
+<script>
+    (function () {
+        var now = Date.now();
+        localStorage.clear();
+        localStorage.setItem('nexus-ops-auth', JSON.stringify({ id: 'central', name: 'Equipe Central', role: 'admin', roleLabel: 'Administrador', home: 'index.html', createdAt: now, expiresAt: now + 3600000 }));
+        localStorage.setItem('central-gelo-state', JSON.stringify({
+            schemaVersion: 2,
+            revision: 1,
+            updatedAt: now,
+            resetAt: now,
+            production: 500,
+            centralStockBags: 100,
+            clientStock: 100,
+            stockPercent: 3,
+            revenueValue: 1000,
+            simulationStep: 1,
+            nextOrderId: 2001,
+            orderNumber: 2001,
+            recentOrders: [{ id: 2000, quantity: 50, status: 'route', client: 'Supermercado XYZ', createdAt: now - 10000, statusChangedAt: now - 5000 }]
+        }));
+        var target = new URLSearchParams(location.search).get('target') === 'client' ? 'supermercado-xyz.html' : 'central-gelo.html';
+        location.replace(target + '?e2e=1');
+    })();
+</script>

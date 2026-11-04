@@ -1,0 +1,61 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Operations tests</title>
+<script src="operations.js"></script>
+<pre id="result">RUNNING</pre>
+<script>
+    (function () {
+        var failures = [];
+        function assert(condition, message) { if (!condition) failures.push(message); }
+        var Ops = window.NexusOperations;
+        var defaults = Ops.createDefaultState();
+        assert(Ops.nextOrderId(defaults.recentOrders, 1026) === 1036, 'next ID must follow the highest existing order');
+        var many = [];
+        for (var index = 0; index < 12; index += 1) many.push({ id: 2000 + index, quantity: 50, status: 'production', client: index % 2 ? Ops.CLIENT_NAME : 'Outro cliente' });
+        assert(Ops.normalizeOrders(many).length === 12, 'normalization must not discard orders');
+        assert(Ops.ordersForClient(many, Ops.CLIENT_NAME).length === 6, 'client filtering must exclude other customers');
+        var collisions = Ops.normalizeOrders([
+            { id: 3000, uid: 'request-a', quantity: 50, status: 'production', createdAt: 1 },
+            { id: 3000, uid: 'request-b', quantity: 50, status: 'production', createdAt: 2 }
+        ]);
+        assert(collisions.length === 2 && collisions[0].id !== collisions[1].id, 'concurrent IDs must be retained and renumbered');
+        collisions = Ops.advanceOrder(collisions, 'request-b', 3).orders;
+        assert(collisions.find(function (order) { return order.uid === 'request-b'; }).status === 'separating', 'UID must advance the intended concurrent order');
+        var merge = Ops.mergeOrders([{ id: 9, status: 'production' }], [{ id: 9, status: 'delivered', deliveredAt: Date.now() }]);
+        assert(merge.length === 1 && merge[0].status === 'delivered', 'merge must preserve the furthest status');
+        var pipeline = [
+            { id: 1, quantity: 50, status: 'production', client: Ops.CLIENT_NAME, statusChangedAt: 1 },
+            { id: 2, quantity: 50, status: 'separating', client: Ops.CLIENT_NAME, statusChangedAt: 2 },
+            { id: 3, quantity: 50, status: 'route', client: Ops.CLIENT_NAME, statusChangedAt: 3 }
+        ];
+        var capturedProduction = Ops.oldestByStatus(pipeline, 'production');
+        var capturedSeparating = Ops.oldestByStatus(pipeline, 'separating');
+        var capturedRoute = Ops.oldestByStatus(pipeline, 'route');
+        pipeline = Ops.advanceOrder(pipeline, capturedRoute.id, 10).orders;
+        pipeline = Ops.advanceOrder(pipeline, capturedSeparating.id, 10).orders;
+        pipeline = Ops.advanceOrder(pipeline, capturedProduction.id, 10).orders;
+        assert(pipeline.find(function (order) { return order.id === 1; }).status === 'separating', 'production order skipped a stage');
+        assert(pipeline.find(function (order) { return order.id === 2; }).status === 'route', 'separating order did not enter the route');
+        assert(pipeline.find(function (order) { return order.id === 3; }).status === 'delivered', 'route order did not finish');
+        var queue = defaults.recentOrders;
+        var initialRouteIds = queue.filter(function (order) { return order.status === 'route'; }).map(function (order) { return order.id; });
+        for (var tick = 0; tick < 8; tick += 1) {
+            var route = Ops.oldestByStatus(queue, 'route');
+            var separating = Ops.oldestByStatus(queue, 'separating');
+            var production = Ops.oldestByStatus(queue, 'production');
+            if (route) queue = Ops.advanceOrder(queue, route.id, 100 + tick).orders;
+            if (separating) queue = Ops.advanceOrder(queue, separating.id, 100 + tick).orders;
+            if (production) queue = Ops.advanceOrder(queue, production.id, 100 + tick).orders;
+            if ((tick + 1) % 3 === 0) queue = Ops.mergeOrders(queue, [{ id: Ops.nextOrderId(queue), quantity: 50, status: 'production', client: Ops.CLIENT_NAME, statusChangedAt: 100 + tick }]);
+        }
+        assert(initialRouteIds.every(function (id) { return queue.find(function (order) { return order.id === id; }).status === 'delivered'; }), 'an initial route order remained stuck');
+        var bus = Ops.createStateBus('operations-test-state');
+        localStorage.removeItem('operations-test-state');
+        var published = bus.publish({ recentOrders: queue });
+        assert(published.revision === 1 && bus.read().recentOrders.length === queue.length, 'state bus failed to publish canonical data');
+        localStorage.removeItem('operations-test-state');
+        var output = document.getElementById('result');
+        output.dataset.tests = failures.length ? 'failed' : 'passed';
+        output.textContent = failures.length ? failures.join('\n') : 'PASS: shared state, unique IDs, client filter and delivery pipeline';
+    })();
+</script>

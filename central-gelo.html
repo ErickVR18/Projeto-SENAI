@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#eaf6ff">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Central Gelo | Painel operacional</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>window.lucide = window.lucide || { createIcons: function () {} };</script>
+    <script>if (localStorage.getItem('gelo-theme') === 'dark') document.documentElement.classList.add('dark-theme');</script>
+    <script src="auth.js"></script>
+    <script>NexusAuth.requireAuth(['admin']);</script>
+    <script src="operations.js"></script>
+    <style>
+        :root { --ink: #0b2233; --muted: #4f6b7b; --line: rgba(67,116,143,.3); --blue: #0d65b5; --cyan: #21a9d2; --green: #258d61; --orange: #c27b10; --red: #ba4545; }
+        * { box-sizing: border-box; }
+        html.dark-theme { --ink: #e5f3fb; --muted: #9bb4c4; --line: rgba(157,201,222,.2); }
+        body { margin: 0; min-height: 100vh; color: var(--ink); font-family: 'DM Sans', sans-serif; background: #f6fbff; background-image: radial-gradient(circle at 12% 12%, rgba(118,213,239,.22), transparent 27%), radial-gradient(circle at 86% 84%, rgba(37,119,212,.13), transparent 30%), linear-gradient(135deg,#fafeff 0%,#edf7fc 48%,#f6fbff 100%); transition: color .35s ease, background .35s ease; }
+        html.dark-theme body { background: #0d1d2a; background-image: radial-gradient(circle at 12% 12%,rgba(22,116,169,.24),transparent 27%), radial-gradient(circle at 86% 84%,rgba(20,80,142,.22),transparent 30%), linear-gradient(135deg,#102635 0%,#0d1d2a 52%,#122c3b 100%); }
+        .shell { min-height: 100vh; padding: 34px clamp(20px,6vw,96px) 54px; }
+        .topbar, .content { max-width: 1180px; margin: 0 auto; position: relative; z-index: 1; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; animation: drop .5s ease both; }
+        .brand { display: flex; align-items: center; gap: 11px; font: 700 22px 'Space Grotesk',sans-serif; letter-spacing: -.05em; }
+        .brand-mark { width: 31px; height: 31px; display: grid; place-items: center; color: white; background: linear-gradient(145deg,#29b9ec,#146bc5); border-radius: 10px; box-shadow: 0 7px 16px rgba(25,126,205,.25); }
+        .brand-mark svg { width: 17px; }
+        .nav { display: flex; align-items: center; gap: 16px; }
+        .back-link { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; text-decoration: none; }
+        .back-link:hover { color: var(--blue); }
+        .back-link svg, .theme-toggle svg { width: 16px; }
+        .theme-toggle { width: 35px; height: 35px; display: grid; place-items: center; color: var(--ink); background: rgba(255,255,255,.62); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+        html.dark-theme .theme-toggle { background: rgba(26,56,72,.78); }
+        .content { margin-top: 62px; }
+        .eyebrow { margin: 0 0 10px; color: #086b9d; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+        h1 { margin: 0; font: 700 clamp(34px,5vw,58px)/1 'Space Grotesk',sans-serif; letter-spacing: -.075em; }
+        .intro { display: flex; align-items: end; justify-content: space-between; gap: 25px; margin-bottom: 30px; }
+        .intro-copy { max-width: 350px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+        .sync { display: flex; align-items: center; gap: 7px; margin-top: 12px; color: var(--green); font-size: 11px; font-weight: 700; }
+        .sync-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; box-shadow: 0 0 0 4px rgba(37,141,97,.13); }
+        .simulate-button { display: inline-flex; align-items: center; gap: 7px; margin-top: 15px; padding: 10px 13px; color: #fff; background: var(--blue); border: 0; border-radius: 9px; cursor: pointer; font: 700 11px 'DM Sans', sans-serif; }
+        .simulate-button:hover { background: #095493; transform: translateY(-2px); }
+        .simulate-button svg { width: 14px; }
+        .reset-button { display: inline-flex; align-items: center; gap: 7px; margin: 15px 0 0 7px; padding: 10px 13px; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 9px; cursor: pointer; font: 700 11px 'DM Sans', sans-serif; }
+        .reset-button:hover { color: var(--red); border-color: var(--red); }
+        .reset-button svg { width: 14px; }
+        .metrics { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; }
+        .metric, .panel { background: rgba(255,255,255,.72); border: 1px solid rgba(255,255,255,.9); border-radius: 14px; box-shadow: 0 12px 24px rgba(80,139,171,.09); backdrop-filter: blur(13px); }
+        html.dark-theme .metric, html.dark-theme .panel { background: rgba(20,45,59,.78); border-color: rgba(137,190,214,.16); }
+        .metric { padding: 16px; animation: rise .5s ease both; }
+        .metric:nth-child(2){animation-delay:.08s}.metric:nth-child(3){animation-delay:.16s}.metric:nth-child(4){animation-delay:.24s}.metric:nth-child(5){animation-delay:.32s}
+        .metric-top { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 11px; }
+        .metric-top svg { width: 17px; color: var(--cyan); }
+        .metric strong { display: block; margin-top: 12px; font: 700 27px 'Space Grotesk',sans-serif; }
+        .metric small { color: var(--muted); font-size: 10px; }
+        .dashboard-grid { display: grid; grid-template-columns: 1.35fr .9fr; gap: 16px; margin-top: 18px; }
+        .panel { padding: 20px; }
+        .panel-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+        .panel-title h2 { margin: 0; font: 600 17px 'Space Grotesk',sans-serif; }
+        .panel-title span { color: var(--muted); font-size: 10px; }
+        .flow { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; }
+        .flow-step { position: relative; padding: 12px 6px; text-align: center; background: rgba(232,246,252,.76); border: 1px solid transparent; border-radius: 9px; cursor: pointer; transition: color .25s ease, background .25s ease, border-color .25s ease, transform .25s ease, box-shadow .25s ease; }
+        .flow-step:hover { transform: translateY(-3px); border-color: rgba(20,184,201,.35); }
+        .flow-step.active { color: var(--ink); background: rgba(20,184,201,.13); border-color: rgba(20,184,201,.7); box-shadow: 0 0 0 4px rgba(20,184,201,.08), 0 9px 20px rgba(20,184,201,.12); }
+        .flow-step.completed { border-color: rgba(37,141,97,.35); }
+        .flow-step.completed::before { content: ''; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 0 3px rgba(37,141,97,.12); }
+        html.dark-theme .flow-step { background: rgba(14,37,50,.75); }
+        .flow-step:not(:last-child)::after { content: ''; position: absolute; top: 24px; right: -8px; width: 8px; border-top: 1px dashed #7ec5dc; transition: border-color .25s ease, box-shadow .25s ease; }
+        .flow-step.completed:not(:last-child)::after { border-color: var(--green); box-shadow: 0 0 5px rgba(37,141,97,.4); }
+        .flow-step svg { width: 18px; color: var(--blue); margin-bottom: 7px; }
+        .flow-step strong { display: block; font: 600 12px 'Space Grotesk',sans-serif; }
+        .flow-step span { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+        .order-list { display: grid; gap: 11px; }
+        .order { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding-bottom: 11px; border-bottom: 1px solid var(--line); }
+        .order:last-child { padding-bottom: 0; border-bottom: 0; }
+        .order-info { display: flex; align-items: center; gap: 10px; }
+        .order-icon { width: 30px; height: 30px; display: grid; place-items: center; color: var(--blue); background: #d9f1fc; border-radius: 8px; }
+        .order-icon svg { width: 15px; }
+        .order strong { display: block; font-size: 12px; } .order span { color: var(--muted); font-size: 10px; }
+        .pill { padding: 5px 8px; border-radius: 20px; font-size: 9px; font-weight: 700; white-space: nowrap; } .pill.green { color: #176b49; background: #d9f3e6; } .pill.orange { color: #895b05; background: #ffedbf; } .pill.blue { color: #145f9d; background: #dceefa; }
+        .stock-row { margin-bottom: 17px; } .stock-label { display: flex; justify-content: space-between; margin-bottom: 7px; color: var(--muted); font-size: 11px; } .stock-label strong { color: var(--ink); }
+        .bar { height: 7px; overflow: hidden; background: #dfedf3; border-radius: 10px; } .bar i { display: block; height: 100%; background: var(--cyan); border-radius: inherit; } .bar i.warn { background: #d49326; }
+        .activity-list { display: grid; gap: 12px; } .activity { display: flex; gap: 10px; align-items: start; color: var(--muted); font-size: 11px; } .activity svg { width: 15px; color: var(--cyan); flex: none; } .activity strong { color: var(--ink); font-weight: 600; }
+        .footer-note { margin-top: 30px; color: var(--muted); font-size: 10px; text-align: right; }
+        .notification-stack { position: fixed; top: 24px; right: 24px; display: grid; gap: 10px; width: min(350px, calc(100vw - 36px)); z-index: 5; pointer-events: none; }
+        .notification { display: flex; gap: 11px; padding: 14px; color: var(--ink); background: #fff; border: 1px solid #c5e1ec; border-left: 4px solid var(--cyan); border-radius: 11px; box-shadow: 0 14px 30px rgba(17,40,60,.18); animation: notice-in .45s ease both; pointer-events: auto; }
+        html.dark-theme .notification { background: #173343; border-color: rgba(157,201,222,.25); }
+        .notification.out { animation: notice-out .4s ease forwards; }
+        .notification-icon { width: 29px; height: 29px; display: grid; place-items: center; flex: none; color: var(--blue); background: #dff3fa; border-radius: 8px; }
+        .notification-icon svg { width: 15px; }
+        .notification strong { display: block; margin-bottom: 3px; font-size: 12px; }
+        .notification span { color: var(--muted); font-size: 11px; line-height: 1.4; }
+        @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } } @keyframes drop { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } } @keyframes notice-in { from { opacity: 0; transform: translateX(35px); } to { opacity: 1; transform: translateX(0); } } @keyframes notice-out { to { opacity: 0; transform: translateX(35px); } }
+        @media (max-width: 850px) { .metrics { grid-template-columns: repeat(3,1fr); } .dashboard-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) { .shell { padding: 24px 18px 38px; } .content { margin-top: 50px; } .intro { display: block; } .intro-copy { margin-top: 16px; } .metrics { grid-template-columns: repeat(2,1fr); } .flow { grid-template-columns: repeat(3,1fr); } .flow-step:nth-child(3)::after { display: none; } .flow-step:nth-child(4), .flow-step:nth-child(5) { margin-top: 3px; } .nav .back-link { font-size: 0; } .nav .back-link svg { width: 18px; } }
+        @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="shell">
+        <header class="topbar"><div class="brand"><span class="brand-mark"><i data-lucide="snowflake"></i></span>Central Gelo</div><nav class="nav"><span class="auth-user" data-auth-name>Equipe Central</span><button class="theme-toggle" type="button" title="Ativar modo escuro" aria-label="Ativar modo escuro"><i data-lucide="moon"></i></button><button class="exit-system" data-logout type="button" title="Sair do sistema" aria-label="Sair do sistema"><i data-lucide="log-out"></i></button><a class="back-link" href="index.html"><i data-lucide="arrow-left"></i><span>Visão geral</span></a></nav></header>
+        <section class="content" aria-label="Painel operacional Central Gelo">
+            <div class="intro"><div><p class="eyebrow">Escritório central · Volta Redonda, RJ</p><h1>Controle total da operação.</h1><div class="sync"><i class="sync-dot"></i> Dados sincronizados em tempo real</div><button class="simulate-button" id="simulate" type="button"><i data-lucide="pause"></i> PARAR SIMULAÇÃO</button><button class="reset-button" id="reset-data" type="button"><i data-lucide="rotate-ccw"></i> RESETAR DADOS</button></div><p class="intro-copy">Acompanhe pedidos, produção, estoque, logística e financeiro em um único painel conectado aos clientes.</p></div>
+            <div class="metrics"><article class="metric"><div class="metric-top"><span>Pedidos em aberto</span><i data-lucide="clipboard-list"></i></div><strong id="open-orders">18</strong><small>+4 desde ontem</small></article><article class="metric"><div class="metric-top"><span>Produção hoje</span><i data-lucide="factory"></i></div><strong id="production">12.450</strong><small>sacos de gelo</small></article><article class="metric"><div class="metric-top"><span>Entregas em rota</span><i data-lucide="truck"></i></div><strong id="deliveries">7</strong><small>motoristas ativos</small></article><article class="metric"><div class="metric-top"><span>Estoque disponível</span><i data-lucide="boxes"></i></div><strong id="stock-total">86%</strong><small>capacidade atual</small></article><article class="metric"><div class="metric-top"><span>Receita do mês</span><i data-lucide="circle-dollar-sign"></i></div><strong id="revenue">R$ 48,2k</strong><small>+12,8% no período</small></article></div>
+            <div class="dashboard-grid"><section class="panel"><div class="panel-title"><h2>Fluxo operacional</h2><span>atualizado agora</span></div><div class="flow"><div class="flow-step"><i data-lucide="shopping-cart"></i><strong>Vendas</strong><span>18 pedidos</span></div><div class="flow-step"><i data-lucide="factory"></i><strong>Produção</strong><span>Em andamento</span></div><div class="flow-step"><i data-lucide="boxes"></i><strong>Estoque</strong><span>86% cheio</span></div><div class="flow-step"><i data-lucide="truck"></i><strong>Logística</strong><span>7 em rota</span></div><div class="flow-step"><i data-lucide="badge-dollar-sign"></i><strong>Financeiro</strong><span>Conferido</span></div></div><div class="panel-title" style="margin-top:28px"><h2>Pedidos recentes</h2><span>ver todos</span></div><div class="order-list"><div class="order"><div class="order-info"><span class="order-icon"><i data-lucide="package"></i></span><div><strong>Pedido #1025</strong><span>Supermercado XYZ · 50 sacos</span></div></div><span class="pill orange">EM PRODUÇÃO</span></div><div class="order"><div class="order-info"><span class="order-icon"><i data-lucide="package-check"></i></span><div><strong>Pedido #1024</strong><span>Mercado Central · 120 sacos</span></div></div><span class="pill blue">SEPARANDO</span></div><div class="order"><div class="order-info"><span class="order-icon"><i data-lucide="package-check"></i></span><div><strong>Pedido #1023</strong><span>Bar do Zé · 30 sacos</span></div></div><span class="pill green">ENTREGUE</span></div></div></section><aside class="panel"><div class="panel-title"><h2>Estoque por unidade</h2><span>capacidade</span></div><div class="stock-row"><div class="stock-label"><span>Gelo em cubos</span><strong>72%</strong></div><div class="bar"><i style="width:72%"></i></div></div><div class="stock-row"><div class="stock-label"><span>Gelo triturado</span><strong>91%</strong></div><div class="bar"><i style="width:91%"></i></div></div><div class="stock-row"><div class="stock-label"><span>Embalagens</span><strong>38%</strong></div><div class="bar"><i class="warn" style="width:38%"></i></div></div><div class="panel-title" style="margin-top:28px"><h2>Atividades recentes</h2><span>hoje</span></div><div class="activity-list"><div class="activity"><i data-lucide="check-circle-2"></i><span><strong>Pedido #1025</strong> foi recebido do cliente</span></div><div class="activity"><i data-lucide="scan-line"></i><span><strong>Freezer #045</strong> enviou dados pelo QR Code</span></div><div class="activity"><i data-lucide="truck"></i><span><strong>Entrega #2058</strong> saiu para Volta Redonda</span></div><div class="activity"><i data-lucide="circle-dollar-sign"></i><span><strong>Financeiro</strong> conciliou 12 pedidos</span></div></div></aside></div>
+        </section>
+        <p class="footer-note">Central Gelo · Operação conectada do cliente ao escritório</p>
+    </main>
+    <div class="notification-stack" id="notifications" aria-live="polite"></div>
+    <script>
+        lucide.createIcons();
+        var themeToggle = document.querySelector('.theme-toggle');
+        function updateThemeButton() { var dark = document.documentElement.classList.contains('dark-theme'); themeToggle.title = dark ? 'Ativar modo claro' : 'Ativar modo escuro'; themeToggle.setAttribute('aria-label', themeToggle.title); themeToggle.innerHTML = '<i data-lucide="' + (dark ? 'sun' : 'moon') + '"></i>'; lucide.createIcons(); }
+        updateThemeButton();
+        themeToggle.addEventListener('click', function () { document.documentElement.classList.toggle('dark-theme'); localStorage.setItem('gelo-theme', document.documentElement.classList.contains('dark-theme') ? 'dark' : 'light'); updateThemeButton(); });
+        var Ops = window.NexusOperations;
+        var centralStateKey = 'central-gelo-state';
+        var centralBus = Ops.createStateBus(centralStateKey);
+        var storedState = centralBus.read();
+        if (!Number.isFinite(Number(storedState.revenueValue)) && storedState.revenue) {
+            var legacyRevenue = Number(String(storedState.revenue).replace('R$', '').replace('k', '').replace('.', '').replace(',', '.').trim());
+            if (Number.isFinite(legacyRevenue)) storedState.revenueValue = legacyRevenue * (String(storedState.revenue).indexOf('k') >= 0 ? 1000 : 1);
+        }
+        var centralState = Ops.prepareState(storedState);
+        if (!Array.isArray(storedState.recentOrders) || Number(storedState.schemaVersion) !== 2) centralState = centralBus.publish(centralState);
+        var recentOrders = Ops.normalizeOrders(centralState.recentOrders);
+        var simulationStep = Number(centralState.simulationStep) || 0;
+        var orderNumber = Ops.nextOrderId(recentOrders, centralState.nextOrderId || centralState.orderNumber);
+        var productionToday = Number(centralState.production) || 0;
+        var centralStockBags = Number(centralState.centralStockBags) || 0;
+        var clientStock = Number(centralState.clientStock) || 0;
+        var stockPercent = Number(centralState.stockPercent) || 0;
+        var revenueValue = Number(centralState.revenueValue) || 0;
+        var resetAt = Number(centralState.resetAt) || 0;
+        var lastEvent = centralState.lastEvent || '';
+        var lastEventOrder = centralState.lastEventOrder || '';
+        var simulationTimer;
+        var simulationRunning = centralState.simulationPaused !== true;
+        function showNotification(title, message, icon) { var notification = document.createElement('div'); notification.className = 'notification'; notification.innerHTML = '<span class="notification-icon"><i data-lucide="' + icon + '"></i></span><div><strong>' + title + '</strong><span>' + message + '</span></div>'; document.getElementById('notifications').appendChild(notification); lucide.createIcons(); window.setTimeout(function () { notification.classList.add('out'); window.setTimeout(function () { notification.remove(); }, 400); }, 4500); }
+        var flowSteps = document.querySelectorAll('.flow-step');
+        var flowNames = ['Vendas', 'Produção', 'Estoque', 'Logística', 'Financeiro'];
+        function updateFlow(activeIndex) { flowSteps.forEach(function (step, index) { step.classList.toggle('active', index === activeIndex); step.classList.toggle('completed', index < activeIndex); }); }
+        flowSteps.forEach(function (step, index) { step.setAttribute('tabindex', '0'); step.setAttribute('role', 'button'); step.addEventListener('click', function () { updateFlow(index); showNotification('Etapa selecionada', flowNames[index] + ' está conectada ao fluxo operacional.', 'workflow'); }); step.addEventListener('keydown', function (event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); step.click(); } }); });
+        function escapeHtml(value) { return String(value).replace(/[&<>"']/g, function (character) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[character]; }); }
+        function formatRevenue(value) { if (value >= 1000) return 'R$ ' + (value / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + 'k'; return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function recalculateStock() { stockPercent = Math.round(Math.min(100, Math.max(0, centralStockBags / Ops.CENTRAL_CAPACITY * 100))); }
+        function renderOrders() {
+            var orderList = document.querySelector('.order-list');
+            var visibleOrders = Ops.normalizeOrders(recentOrders).slice(0, 5);
+            var statusDetails = { production: ['EM PRODUÇÃO', 'orange', 'package'], separating: ['SEPARANDO', 'blue', 'package-check'], route: ['EM ROTA', 'blue', 'truck'], delivered: ['ENTREGUE', 'green', 'package-check'] };
+            orderList.innerHTML = visibleOrders.map(function (order) { var details = statusDetails[order.status] || statusDetails.production; return '<div class="order"><div class="order-info"><span class="order-icon"><i data-lucide="' + details[2] + '"></i></span><div><strong>Pedido #' + order.id + '</strong><span>' + escapeHtml(order.client) + ' · ' + order.quantity + ' sacos</span></div></div><span class="pill ' + details[1] + '">' + details[0] + '</span></div>'; }).join('');
+            if (!visibleOrders.length) orderList.innerHTML = '<div class="order"><div class="order-info"><span class="order-icon"><i data-lucide="package-check"></i></span><div><strong>Sem pedidos ativos</strong><span>A fila está pronta para receber novos pedidos.</span></div></div><span class="pill green">FILA LIMPA</span></div>';
+            lucide.createIcons();
+        }
+        function renderDashboard() {
+            recentOrders = Ops.normalizeOrders(recentOrders);
+            var counts = Ops.countOrders(recentOrders);
+            recalculateStock();
+            document.getElementById('open-orders').textContent = counts.open;
+            document.getElementById('production').textContent = productionToday.toLocaleString('pt-BR');
+            document.getElementById('deliveries').textContent = counts.route;
+            document.getElementById('stock-total').textContent = stockPercent + '%';
+            document.getElementById('revenue').textContent = formatRevenue(revenueValue);
+            var stockBar = document.querySelector('.stock-row .bar i');
+            var stockLabel = document.querySelector('.stock-row .stock-label strong');
+            stockBar.style.width = stockPercent + '%';
+            stockLabel.textContent = stockPercent + '%';
+            var flowLabels = document.querySelectorAll('.flow-step > span');
+            if (flowLabels[0]) flowLabels[0].textContent = counts.open + ' pedidos ativos';
+            if (flowLabels[1]) flowLabels[1].textContent = counts.production + ' em produção';
+            if (flowLabels[2]) flowLabels[2].textContent = stockPercent + '% cheio';
+            if (flowLabels[3]) flowLabels[3].textContent = counts.route + ' em rota';
+            renderOrders();
+            updateFlow(simulationStep % flowSteps.length);
+        }
+        function buildPayload(baseState) {
+            var counts = Ops.countOrders(recentOrders);
+            orderNumber = Ops.nextOrderId(recentOrders, orderNumber);
+            recalculateStock();
+            return Object.assign({}, baseState || {}, {
+                schemaVersion: 2,
+                resetAt: resetAt,
+                production: productionToday,
+                centralStockBags: centralStockBags,
+                clientStock: clientStock,
+                stockPercent: stockPercent,
+                revenueValue: revenueValue,
+                revenue: formatRevenue(revenueValue),
+                simulationStep: simulationStep,
+                simulationPaused: !simulationRunning,
+                nextOrderId: orderNumber,
+                orderNumber: orderNumber,
+                lastEvent: lastEvent,
+                lastEventOrder: lastEventOrder,
+                openOrders: counts.open,
+                totalOrders: counts.total,
+                deliveries: counts.route,
+                recentOrders: Ops.normalizeOrders(recentOrders)
+            });
+        }
+        function saveCentralState() {
+            var fresh = Ops.prepareState(centralBus.read());
+            var freshReset = Number(fresh.resetAt) || 0;
+            if (freshReset > resetAt) { applyCentralState(fresh, false); return centralState; }
+            var baseState = centralState;
+            if (freshReset === resetAt) {
+                recentOrders = Ops.mergeOrders(fresh.recentOrders, recentOrders);
+                productionToday = Math.max(productionToday, Number(fresh.production) || 0);
+                clientStock = Math.max(clientStock, Number(fresh.clientStock) || 0);
+                revenueValue = Math.max(revenueValue, Number(fresh.revenueValue) || 0);
+                simulationStep = Math.max(simulationStep, Number(fresh.simulationStep) || 0);
+                orderNumber = Ops.nextOrderId(recentOrders, Math.max(orderNumber, fresh.nextOrderId || 0));
+                baseState = fresh;
+            }
+            centralState = centralBus.publish(buildPayload(baseState));
+            renderDashboard();
+            return centralState;
+        }
+        function applyCentralState(state, announce) {
+            if (!state) return;
+            var prepared = Ops.prepareState(state);
+            var incomingReset = Number(prepared.resetAt) || 0;
+            if (incomingReset < resetAt) return;
+            var isNewEpoch = incomingReset > resetAt;
+            var incomingRevision = Number(prepared.revision) || 0;
+            var currentRevision = Number(centralState.revision) || 0;
+            if (!isNewEpoch && incomingRevision < currentRevision) {
+                recentOrders = Ops.mergeOrders(recentOrders, prepared.recentOrders);
+                renderDashboard();
+                return;
+            }
+            recentOrders = isNewEpoch ? Ops.normalizeOrders(prepared.recentOrders) : Ops.mergeOrders(recentOrders, prepared.recentOrders);
+            resetAt = incomingReset;
+            productionToday = isNewEpoch ? Number(prepared.production) || 0 : Math.max(productionToday, Number(prepared.production) || 0);
+            centralStockBags = Number(prepared.centralStockBags) || 0;
+            clientStock = isNewEpoch ? Number(prepared.clientStock) || 0 : Math.max(clientStock, Number(prepared.clientStock) || 0);
+            stockPercent = Number(prepared.stockPercent) || 0;
+            revenueValue = isNewEpoch ? Number(prepared.revenueValue) || 0 : Math.max(revenueValue, Number(prepared.revenueValue) || 0);
+            simulationStep = isNewEpoch ? Number(prepared.simulationStep) || 0 : Math.max(simulationStep, Number(prepared.simulationStep) || 0);
+            simulationRunning = prepared.simulationPaused !== true;
+            orderNumber = Ops.nextOrderId(recentOrders, prepared.nextOrderId || prepared.orderNumber);
+            lastEvent = prepared.lastEvent || '';
+            lastEventOrder = prepared.lastEventOrder || '';
+            centralState = Object.assign({}, prepared, { recentOrders: recentOrders, production: productionToday, clientStock: clientStock, revenueValue: revenueValue, simulationStep: simulationStep, simulationPaused: !simulationRunning });
+            renderDashboard();
+            scheduleSimulation();
+            updateSimulationButton();
+            if (announce) showNotification('Central sincronizada', 'Um pedido ou status foi atualizado em tempo real.', 'refresh-cw');
+        }
+        centralBus.subscribe(function (state) { applyCentralState(state, true); });
+        function advanceTrackedOrder(orderId) {
+            var result = Ops.advanceOrder(recentOrders, orderId, Date.now());
+            if (!result.order || result.previousStatus === result.order.status) return null;
+            recentOrders = result.orders;
+            lastEventOrder = result.order.id;
+            if (result.previousStatus === 'production') {
+                productionToday += result.order.quantity;
+                centralStockBags += result.order.quantity;
+                lastEvent = 'production-complete';
+            } else if (result.previousStatus === 'separating') {
+                centralStockBags = Math.max(0, centralStockBags - result.order.quantity);
+                lastEvent = 'route';
+            } else if (result.previousStatus === 'route') {
+                if (result.order.client === Ops.CLIENT_NAME) clientStock += result.order.quantity;
+                lastEvent = 'delivered';
+            }
+            return result;
+        }
+        function createAutomaticOrder() {
+            var quantities = [50, 80, 100];
+            var quantity = quantities[simulationStep % quantities.length];
+            var newOrder = { id: orderNumber, uid: Ops.createOrderUid('central'), quantity: quantity, status: 'production', client: Ops.CLIENT_NAME, createdAt: Date.now(), statusChangedAt: Date.now() };
+            recentOrders = Ops.mergeOrders(recentOrders, [newOrder]);
+            lastEvent = 'new-order';
+            lastEventOrder = newOrder.id;
+            revenueValue += quantity * 5;
+            orderNumber = Ops.nextOrderId(recentOrders, newOrder.id + 1);
+            return newOrder;
+        }
+        function simulateOperation() {
+            if (!simulationRunning) return;
+            var freshest = centralBus.read();
+            if (Number(freshest.resetAt) > resetAt || Number(freshest.revision) > Number(centralState.revision)) applyCentralState(freshest, false);
+            if (!simulationRunning) return;
+            var routeOrder = Ops.oldestByStatus(recentOrders, 'route');
+            var separatingOrder = Ops.oldestByStatus(recentOrders, 'separating');
+            var productionOrder = Ops.oldestByStatus(recentOrders, 'production');
+            var deliveredResult = routeOrder ? advanceTrackedOrder(routeOrder.uid || routeOrder.id) : null;
+            var routeResult = separatingOrder ? advanceTrackedOrder(separatingOrder.uid || separatingOrder.id) : null;
+            var productionResult = productionOrder ? advanceTrackedOrder(productionOrder.uid || productionOrder.id) : null;
+            simulationStep += 1;
+            var counts = Ops.countOrders(recentOrders);
+            var newOrder = (simulationStep % 3 === 0 || counts.open === 0) ? createAutomaticOrder() : null;
+            if (deliveredResult) { lastEvent = 'delivered'; lastEventOrder = deliveredResult.order.id; }
+            else if (routeResult) { lastEvent = 'route'; lastEventOrder = routeResult.order.id; }
+            else if (productionResult) { lastEvent = 'production-complete'; lastEventOrder = productionResult.order.id; }
+            else if (newOrder) { lastEvent = 'new-order'; lastEventOrder = newOrder.id; }
+            saveCentralState();
+            if (deliveredResult) showNotification('Pedido entregue', 'O pedido #' + deliveredResult.order.id + ' chegou ao ' + deliveredResult.order.client + '.', 'package-check');
+            else if (routeResult) showNotification('Pedido saiu para entrega', 'O pedido #' + routeResult.order.id + ' avançou para a rota.', 'truck');
+            else if (productionResult) showNotification('Produção concluída', productionResult.order.quantity + ' sacos do pedido #' + productionResult.order.id + ' entraram no estoque.', 'factory');
+            else if (newOrder) showNotification('Novo pedido gerado', 'O pedido #' + newOrder.id + ' foi conectado ao Supermercado XYZ.', 'shopping-cart');
+            var button = document.getElementById('simulate');
+            button.classList.add('status-updated');
+            window.setTimeout(function () { button.classList.remove('status-updated'); }, 600);
+        }
+        function updateSimulationButton() { var button = document.getElementById('simulate'); button.innerHTML = '<i data-lucide="' + (simulationRunning ? 'pause' : 'radio') + '"></i> ' + (simulationRunning ? 'PARAR SIMULAÇÃO' : 'SIMULAR ATUALIZAÇÃO'); lucide.createIcons(); }
+        function resetCentralState() {
+            window.clearInterval(simulationTimer);
+            simulationRunning = false;
+            simulationStep = 0;
+            orderNumber = Ops.nextOrderId(recentOrders, orderNumber);
+            lastEvent = '';
+            lastEventOrder = '';
+            productionToday = 0;
+            centralStockBags = 0;
+            clientStock = 0;
+            stockPercent = 0;
+            revenueValue = 0;
+            resetAt = Math.max(Date.now(), resetAt + 1);
+            recentOrders = [];
+            document.getElementById('notifications').innerHTML = '';
+            centralState = centralBus.publish(buildPayload({ revision: Number(centralState.revision) || 0 }));
+            renderDashboard();
+            scheduleSimulation();
+            updateSimulationButton();
+            showNotification('Dados resetados', 'Todos os indicadores estão em zero. Clique em Simular Atualização para começar.', 'rotate-ccw');
+        }
+        function scheduleSimulation() { window.clearInterval(simulationTimer); if (simulationRunning) simulationTimer = window.setInterval(simulateOperation, 10000); }
+        function toggleSimulation() { simulationRunning = !simulationRunning; window.clearInterval(simulationTimer); if (simulationRunning) simulateOperation(); else saveCentralState(); scheduleSimulation(); updateSimulationButton(); }
+        renderDashboard();
+        updateSimulationButton();
+        document.getElementById('simulate').addEventListener('click', toggleSimulation);
+        scheduleSimulation();
+        document.getElementById('reset-data').addEventListener('click', resetCentralState);
+    </script>
+</body>
+</html>

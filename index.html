@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#eaf6ff">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>NEXUS OPS | Plataforma de operações</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>window.lucide = window.lucide || { createIcons: function () {} };</script>
+    <script>if (localStorage.getItem('gelo-theme') === 'dark') document.documentElement.classList.add('dark-theme');</script>
+    <script src="freezer-routing.js"></script>
+    <script src="auth.js"></script>
+    <script>NexusAuth.requireAuth(['admin']);</script>
+    <script src="operations.js"></script>
+    <style>
+        :root {
+            --ink: #0b2233;
+            --muted: #4f6b7b;
+            --ice: #eaf6ff;
+            --line: rgba(67, 116, 143, .3);
+            --blue: #0d65b5;
+            --blue-deep: #0753a0;
+            --green: #2fb27b;
+        }
+
+        * { box-sizing: border-box; }
+        html.dark-theme { --ink: #e5f3fb; --muted: #9bb4c4; --line: rgba(157, 201, 222, .2); }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            background: #f6fbff;
+            background-image: radial-gradient(circle at 12% 12%, rgba(118, 213, 239, .22), transparent 27%), radial-gradient(circle at 86% 84%, rgba(37, 119, 212, .13), transparent 30%), linear-gradient(135deg, #fafeff 0%, #edf7fc 48%, #f6fbff 100%);
+            transition: color .35s ease, background-color .35s ease, background-image .35s ease;
+        }
+        html.dark-theme body { background: #0d1d2a; background-image: radial-gradient(circle at 12% 12%, rgba(22, 116, 169, .24), transparent 27%), radial-gradient(circle at 86% 84%, rgba(20, 80, 142, .22), transparent 30%), linear-gradient(135deg, #102635 0%, #0d1d2a 52%, #122c3b 100%); }
+
+        .page-shell { min-height: 100vh; padding: 42px clamp(22px, 7vw, 112px) 48px; position: relative; overflow: hidden; }
+        .page-shell::before { content: ''; position: absolute; width: 520px; height: 520px; right: -240px; top: -210px; border: 1px solid rgba(101, 177, 219, .22); border-radius: 50%; box-shadow: 0 0 0 35px rgba(117, 200, 230, .06), 0 0 0 70px rgba(117, 200, 230, .04); }
+        .topbar { max-width: 1180px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+        .topbar { animation: fade-down .55s ease both; }
+        .brand { display: flex; align-items: center; gap: 11px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -.05em; font-size: 22px; }
+        .brand-mark { width: 31px; height: 31px; display: grid; place-items: center; color: white; background: linear-gradient(145deg, #29b9ec, #146bc5); border-radius: 10px; box-shadow: 0 7px 16px rgba(25, 126, 205, .25); }
+        .brand-mark svg { width: 17px; stroke-width: 2.7; }
+        .top-meta { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; }
+        .avatar { width: 35px; height: 35px; display: grid; place-items: center; color: #1268b8; background: rgba(255,255,255,.7); border: 1px solid var(--line); border-radius: 50%; font-size: 12px; font-weight: 700; }
+        .theme-toggle { width: 35px; height: 35px; display: grid; place-items: center; color: var(--ink); background: rgba(255,255,255,.62); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+        .theme-toggle:hover { color: #21a9d2; border-color: #65bddc; }
+        .theme-toggle svg { width: 16px; }
+        html.dark-theme .theme-toggle, html.dark-theme .avatar { background: rgba(26, 56, 72, .78); }
+
+        .workspace { max-width: 950px; margin: 110px auto 0; position: relative; z-index: 1; }
+        .intro { animation: rise .65s ease both; }
+        .eyebrow { margin: 0 0 16px; color: #086b9d; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+        h1 { max-width: 420px; margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: clamp(38px, 5vw, 66px); line-height: .98; letter-spacing: -.075em; }
+        h1 span { color: #48add5; }
+        .intro-copy { max-width: 370px; margin: 22px 0 34px; color: var(--muted); font-size: 15px; line-height: 1.65; }
+        .primary-link { display: inline-flex; align-items: center; gap: 9px; padding: 14px 18px; color: #fff; background: linear-gradient(110deg, #21b6dc, #176bd0); border-radius: 13px; box-shadow: 0 10px 17px rgba(24, 126, 205, .25); font-size: 12px; font-weight: 700; text-decoration: none; transition: transform .2s, box-shadow .2s; }
+        .primary-link:hover { transform: translateY(-2px); box-shadow: 0 14px 22px rgba(24, 126, 205, .3); }
+        .primary-link svg { transition: transform .25s ease; }
+        .primary-link:hover svg { transform: translateX(4px); }
+        .primary-link svg { width: 16px; }
+        .info-row { display: flex; gap: 28px; border-top: 1px solid var(--line); padding-top: 20px; }
+        .info-row strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 19px; }
+        .info-row small { color: var(--muted); font-size: 11px; }
+        .operation-board { max-width: 1180px; margin: 78px auto 0; position: relative; z-index: 1; }
+        .board-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+        .board-title { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 24px; letter-spacing: -.05em; }
+        .board-subtitle { margin: 0; color: var(--muted); font-size: 12px; }
+        .flow-board { display: grid; grid-template-columns: 1fr 92px 1fr; align-items: stretch; gap: 14px; }
+        .flow-panel { padding: 19px; background: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.88); border-radius: 16px; box-shadow: 0 12px 24px rgba(80, 139, 171, .09); backdrop-filter: blur(13px); }
+        html.dark-theme .flow-panel { background: rgba(20, 45, 59, .78); border-color: rgba(137, 190, 214, .16); }
+        .flow-panel-head { display: flex; align-items: center; gap: 10px; margin-bottom: 17px; }
+        .flow-icon { width: 35px; height: 35px; display: grid; place-items: center; color: #fff; background: #173d63; border-radius: 10px; }
+        .flow-icon svg { width: 18px; }
+        .flow-panel h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 15px; }
+        .flow-panel p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+        .flow-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .flow-item { padding: 11px 8px; text-align: center; background: rgba(235,247,252,.75); border-radius: 9px; }
+        html.dark-theme .flow-item { background: rgba(14, 37, 50, .75); }
+        .flow-item svg { width: 16px; margin-bottom: 5px; color: #147bb5; }
+        .flow-item strong { display: block; color: var(--ink); font-family: 'Space Grotesk', sans-serif; font-size: 15px; }
+        .flow-item span { color: var(--muted); font-size: 9px; }
+        .central-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 15px; color: var(--blue); font-size: 10px; font-weight: 700; text-decoration: none; }
+        .central-link:hover { color: var(--cyan); }
+        .central-link svg { width: 14px; }
+        .integration { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #0d65b5; text-align: center; }
+        .integration-mark { width: 54px; height: 54px; display: grid; place-items: center; background: #d9f1fc; border: 1px solid #a6d9eb; border-radius: 50%; }
+        .integration-mark svg { width: 24px; }
+        .integration strong { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+        .integration-line { width: 100%; height: 1px; background: #8bc9e1; position: relative; }
+        .integration-line::after { content: ''; position: absolute; right: -1px; top: -4px; border-left: 8px solid #8bc9e1; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+        .recent-activity { max-width: 1180px; margin: 18px auto 0; padding: 18px 20px; background: rgba(255,255,255,.52); border: 1px solid var(--line); border-radius: 13px; position: relative; z-index: 1; }
+        html.dark-theme .recent-activity { background: rgba(20, 45, 59, .56); }
+        .activity-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
+        .activity-head h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 14px; }
+        .activity-head span { color: var(--muted); font-size: 10px; }
+        .activity-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .activity { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 11px; }
+        .activity svg { width: 15px; color: #147bb5; }
+        .activity strong { color: var(--ink); font-weight: 600; }
+        .site-footer { max-width: 1180px; margin: 120px auto 0; padding-top: 28px; border-top: 1px solid var(--line); position: relative; z-index: 1; color: var(--muted); }
+        .footer-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 55px; }
+        .footer-title { margin: 0 0 10px; color: var(--ink); font-family: 'Space Grotesk', sans-serif; font-size: 14px; }
+        .footer-text { max-width: 290px; margin: 0; font-size: 12px; line-height: 1.6; }
+        .footer-link { display: flex; align-items: center; gap: 8px; width: fit-content; margin-bottom: 9px; color: var(--muted); font-size: 12px; text-decoration: none; }
+        .footer-link:hover { color: var(--blue); }
+        .footer-link svg { width: 15px; }
+        .footer-bottom { display: flex; justify-content: space-between; gap: 20px; margin-top: 28px; padding-top: 15px; border-top: 1px solid var(--line); font-size: 10px; }
+
+        .phone-wrap { justify-self: center; width: 310px; position: relative; animation: rise .72s .08s ease both; }
+        .phone-wrap::after { content: ''; position: absolute; left: 22px; right: 22px; bottom: -24px; height: 40px; background: rgba(42, 100, 136, .16); filter: blur(19px); border-radius: 50%; z-index: -1; }
+        .phone { padding: 10px; background: #13283a; border-radius: 43px; box-shadow: 13px 28px 54px rgba(43, 88, 116, .28), -5px -3px 11px rgba(255,255,255,.8), inset 0 0 0 1px rgba(255,255,255,.25); }
+        .screen { min-height: 628px; overflow: hidden; padding: 26px 18px 22px; background: linear-gradient(155deg, #f5fcff, #e4f3fc); border-radius: 34px; position: relative; }
+        .screen::before { content: ''; position: absolute; top: 0; left: 50%; width: 106px; height: 24px; transform: translateX(-50%); background: #13283a; border-radius: 0 0 16px 16px; }
+        .app-head { margin: 22px 5px 23px; display: flex; align-items: center; justify-content: space-between; }
+        .app-head h2 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 19px; letter-spacing: -.045em; }
+        .icon-button { width: 30px; height: 30px; display: grid; place-items: center; color: #3b6b88; background: rgba(255,255,255,.6); border: 1px solid rgba(128,176,202,.2); border-radius: 10px; }
+        .icon-button svg { width: 15px; }
+        .label { margin: 0 0 9px 3px; color: #7895a8; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+        .equipment-card { padding: 16px; margin-bottom: 14px; background: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.88); border-radius: 17px; box-shadow: 0 12px 24px rgba(80, 139, 171, .09); backdrop-filter: blur(13px); }
+        .equipment-title { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 13px; }
+        .equipment-card hr { border: 0; border-top: 1px solid #e2eff5; margin: 13px 0 11px; }
+        .location { display: flex; align-items: center; gap: 7px; color: #69889d; font-size: 11px; }
+        .location svg { width: 14px; color: #1b9bc4; }
+        .status { display: flex; align-items: center; justify-content: space-between; padding: 15px 16px; margin-bottom: 19px; background: #f9fdff; border: 1px solid #e0f0f7; border-radius: 15px; }
+        .status-label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; }
+        .status-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 0 4px rgba(47,178,123,.13), 0 0 12px rgba(47,178,123,.72); }
+        .status-text { color: var(--green); font-size: 11px; font-weight: 700; }
+        .checklist { display: grid; gap: 9px; }
+        .check-item { display: flex; align-items: center; justify-content: space-between; padding: 11px 12px; background: rgba(255,255,255,.54); border: 1px solid rgba(195,220,232,.75); border-radius: 13px; transition: .2s ease; }
+        .check-item.checked { border-color: #8fd7be; background: rgba(244,255,250,.76); }
+        .item-name { display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600; }
+        .item-icon { width: 27px; height: 27px; display: grid; place-items: center; color: #3589ae; background: #e3f4fb; border-radius: 8px; }
+        .item-icon svg { width: 14px; }
+        .toggle { width: 34px; height: 20px; padding: 2px; border: 0; background: #c5d8e1; border-radius: 20px; cursor: pointer; transition: .2s ease; }
+        .toggle span { display: block; width: 16px; height: 16px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(39,74,91,.2); transition: .2s ease; }
+        .toggle.active { background: var(--green); }
+        .toggle.active span { transform: translateX(14px); }
+        .register { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; padding: 14px; color: #fff; background: linear-gradient(110deg, #21b6dc, #176bd0); border: 0; border-radius: 13px; box-shadow: 0 10px 17px rgba(24, 126, 205, .25); cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 700; letter-spacing: .1em; transition: transform .2s, box-shadow .2s; }
+        .register:hover { transform: translateY(-2px); box-shadow: 0 14px 22px rgba(24, 126, 205, .3); }
+        .register svg { width: 15px; }
+        .toast { position: absolute; left: 50%; bottom: 17px; width: max-content; max-width: 88%; transform: translate(-50%, 20px); padding: 9px 13px; color: #fff; background: #123b58; border-radius: 9px; font-size: 10px; opacity: 0; pointer-events: none; transition: .3s ease; }
+        .toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+        @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 720px) { .page-shell { padding: 24px 18px 38px; } .top-meta span { display: none; } .workspace { margin-top: 70px; } .intro { text-align: center; } h1, .intro-copy { margin-left: auto; margin-right: auto; } .info-row { justify-content: center; } }
+        @media (max-width: 720px) { .site-footer { margin-top: 80px; } .footer-grid { grid-template-columns: 1fr; gap: 24px; } .footer-bottom { flex-direction: column; gap: 6px; } }
+        @media (max-width: 720px) { .operation-board { margin-top: 58px; } .board-header { display: block; } .board-subtitle { margin-top: 7px; } .flow-board { grid-template-columns: 1fr; } .integration { flex-direction: row; } .integration-line { width: 35%; } .activity-list { grid-template-columns: 1fr; gap: 10px; } }
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="exit-curtain" aria-hidden="true"><div class="exit-glow"></div><div class="exit-message"><div class="exit-loader"></div><strong>Encerrando sistema</strong><span>Até a próxima operação</span></div></div>
+    <main class="page-shell">
+        <header class="topbar">
+            <div class="brand"><span class="brand-mark"><i data-lucide="network"></i></span>NEXUS OPS</div>
+            <div class="top-meta"><span data-auth-name>Equipe Central</span><button class="exit-system" id="exit-system" data-logout type="button" title="Sair do sistema" aria-label="Sair do sistema"><i data-lucide="log-out"></i></button><button class="theme-toggle" type="button" title="Ativar modo escuro" aria-label="Ativar modo escuro"><i data-lucide="moon"></i></button><span class="avatar" data-auth-avatar>EC</span></div>
+        </header>
+
+        <section class="workspace" aria-label="Plataforma de gestão de ativos">
+            <div class="intro">
+                <p class="eyebrow">Visão geral / 24 ago 2026</p>
+                <h1>Infraestrutura sob controle.<br><span>Operação em movimento.</span></h1>
+                <p class="intro-copy">Centralize o controle da cadeia do gelo e dos equipamentos de tecnologia, do ponto de atendimento ao escritório central.</p>
+                <a class="primary-link" href="aparelhos.html">ACESSAR INVENTÁRIO <i data-lucide="arrow-right"></i></a>
+                <div class="info-row"><div><strong id="device-total">0</strong><small>equipamentos cadastrados</small></div></div>
+            </div>
+        </section>
+        <section class="operation-board" aria-labelledby="operation-title">
+            <div class="board-header"><div><p class="eyebrow">Fluxo conectado</p><h2 class="board-title" id="operation-title">Do cliente ao escritório</h2></div><p class="board-subtitle">Informação em tempo real para decisões mais rápidas.</p></div>
+            <div class="flow-board">
+<article class="flow-panel"><div class="flow-panel-head"><span class="flow-icon"><i data-lucide="store"></i></span><div><h3>Supermercado XYZ</h3><p>Ativo no cliente</p></div></div><div class="flow-list"><div class="flow-item"><i data-lucide="package"></i><strong>0</strong><span>pedidos ativos</span></div><div class="flow-item"><i data-lucide="snowflake"></i><strong>0</strong><span>sacos de gelo</span></div><div class="flow-item"><i data-lucide="truck"></i><strong>0</strong><span>em rota</span></div></div><a class="central-link" href="supermercado-xyz.html">ABRIR CLIENTE <i data-lucide="arrow-up-right"></i></a></article>
+                <div class="integration"><div class="integration-mark"><i data-lucide="cloud-upload"></i></div><strong>Integração<br>digital</strong><div class="integration-line"></div></div>
+<article class="flow-panel"><div class="flow-panel-head"><span class="flow-icon"><i data-lucide="building-2"></i></span><div><h3>Central Gelo Escritório</h3><p>Gestão e acompanhamento</p></div></div><div class="flow-list"><div class="flow-item"><i data-lucide="factory"></i><strong>0</strong><span>produção hoje</span></div><div class="flow-item"><i data-lucide="truck"></i><strong>0</strong><span>entregas em rota</span></div><div class="flow-item"><i data-lucide="boxes"></i><strong>0%</strong><span>estoque central</span></div></div><a class="central-link" href="central-gelo.html">ABRIR CENTRAL <i data-lucide="arrow-up-right"></i></a></article>
+            </div>
+            <div class="recent-activity"><div class="activity-head"><h3>Atividades recentes</h3><span>Atualizado agora</span></div><div class="activity-list"><div class="activity"><i data-lucide="check-circle-2"></i><span><strong>Pedido #1025</strong> recebido do Supermercado XYZ</span></div><div class="activity"><i data-lucide="factory"></i><span><strong>Produção</strong> atualizada pela equipe</span></div><div class="activity"><i data-lucide="truck"></i><span><strong>Entrega #2058</strong> saiu para Volta Redonda</span></div></div></div>
+        </section>
+        <footer class="site-footer">
+            <div class="footer-grid">
+                <div><h2 class="footer-title">NEXUS OPS</h2><p class="footer-text">Tecnologia para organizar ativos, simplificar operações e manter empresas em movimento.</p></div>
+                <div><h2 class="footer-title">Fale com a gente</h2><a class="footer-link" href="mailto:contato@nexusops.com.br"><i data-lucide="mail"></i> contato@nexusops.com.br</a><a class="footer-link" href="https://www.linkedin.com/" target="_blank" rel="noreferrer"><i data-lucide="briefcase-business"></i> LinkedIn</a><a class="footer-link" href="https://www.instagram.com/" target="_blank" rel="noreferrer"><i data-lucide="camera"></i> Instagram</a></div>
+            </div>
+            <div class="footer-bottom"><span>© 2026 NEXUS OPS. Todos os direitos reservados.</span><span>Volta Redonda, RJ</span></div>
+        </footer>
+    </main>
+    <script>
+        lucide.createIcons();
+        var themeToggle = document.querySelector('.theme-toggle');
+        function updateThemeButton() { var dark = document.documentElement.classList.contains('dark-theme'); themeToggle.title = dark ? 'Ativar modo claro' : 'Ativar modo escuro'; themeToggle.setAttribute('aria-label', themeToggle.title); themeToggle.innerHTML = '<i data-lucide="' + (dark ? 'sun' : 'moon') + '"></i>'; lucide.createIcons(); }
+        updateThemeButton();
+        themeToggle.addEventListener('click', function () { document.documentElement.classList.toggle('dark-theme'); localStorage.setItem('gelo-theme', document.documentElement.classList.contains('dark-theme') ? 'dark' : 'light'); updateThemeButton(); });
+        var operationsBus = NexusOperations.createStateBus('central-gelo-state');
+        var rawOperationsState = operationsBus.read();
+        var operationsState = NexusOperations.prepareState(rawOperationsState);
+        if (!Array.isArray(rawOperationsState.recentOrders) || Number(rawOperationsState.schemaVersion) !== 2) operationsState = operationsBus.publish(operationsState);
+        function updateClientFlow(nextState) {
+            var prepared = NexusOperations.prepareState(nextState || operationsBus.read());
+            var incomingReset = Number(prepared.resetAt) || 0;
+            var currentReset = Number(operationsState.resetAt) || 0;
+            if (incomingReset < currentReset || (incomingReset === currentReset && Number(prepared.revision) < Number(operationsState.revision))) return;
+            operationsState = prepared;
+            var clientCounts = NexusOperations.countOrders(operationsState.recentOrders, NexusOperations.CLIENT_NAME);
+            var clientItems = document.querySelectorAll('.flow-panel:first-child .flow-item strong');
+            var centralItems = document.querySelectorAll('.flow-panel:last-child .flow-item strong');
+            clientItems[0].textContent = clientCounts.open;
+            clientItems[1].textContent = (Number(operationsState.clientStock) || 0).toLocaleString('pt-BR');
+            clientItems[2].textContent = clientCounts.route;
+            centralItems[0].textContent = (Number(operationsState.production) || 0).toLocaleString('pt-BR');
+            centralItems[1].textContent = NexusOperations.countOrders(operationsState.recentOrders).route;
+            centralItems[2].textContent = (Number(operationsState.stockPercent) || 0) + '%';
+        }
+        function readHomeDevices() { try { var devices = JSON.parse(localStorage.getItem('office-devices') || '[]'); return Array.isArray(devices) ? devices : []; } catch (error) { return []; } }
+        function updateHomeTotals() { document.getElementById('device-total').textContent = readHomeDevices().length; }
+        if (!localStorage.getItem('office-devices')) localStorage.setItem('office-devices', JSON.stringify([{ id: 'F-045' }, { id: 'CT-021' }, { id: 'F-087' }, { id: 'CT-034' }, { id: 'EX-112' }, { id: 'CT-056' }, { id: 'F-118' }, { id: 'CT-023' }, { id: 'F-009' }, { id: 'EX-131' }]));
+        var homeDevices = readHomeDevices();
+        [{ id: 'F-045' }, { id: 'CT-021' }, { id: 'F-087' }, { id: 'CT-034' }, { id: 'EX-112' }, { id: 'CT-056' }, { id: 'F-118' }, { id: 'CT-023' }, { id: 'F-009' }, { id: 'EX-131' }].forEach(function (device) { if (!homeDevices.some(function (item) { return item.id === device.id; })) homeDevices.push(device); });
+        localStorage.setItem('office-devices', JSON.stringify(homeDevices));
+        updateHomeTotals();
+        updateClientFlow(operationsState);
+        operationsBus.subscribe(function (state) { updateClientFlow(state); });
+        window.setInterval(function () { var latest = operationsBus.read(); if (Number(latest.resetAt) !== Number(operationsState.resetAt) || Number(latest.revision) !== Number(operationsState.revision) || latest.mutationId !== operationsState.mutationId) updateClientFlow(latest); }, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!-- <!DOCTYPE html> -->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0c2029">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>NEXUS OPS | Iniciar sistema</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>window.lucide = window.lucide || { createIcons: function () {} };</script>
+    <style>
+        :root {
+            --start-ink: #effbfa;
+            --start-muted: #a9c5c8;
+            --start-cyan: #42d3d2;
+            --start-blue: #287cbb;
+            --start-coral: #f28f6d;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { min-height: 100%; }
+        body {
+            display: grid;
+            min-height: 100vh;
+            color: var(--start-ink);
+            background: #0b2029 !important;
+            background-image:
+                linear-gradient(115deg, rgba(8, 34, 44, .98), rgba(12, 57, 66, .88)),
+                radial-gradient(circle at 80% 14%, rgba(66, 211, 210, .24), transparent 27%),
+                radial-gradient(circle at 14% 88%, rgba(242, 143, 109, .18), transparent 23%) !important;
+            overflow-x: hidden;
+        }
+
+        .start-page {
+            position: relative;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            width: min(100%, 1440px);
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 32px clamp(24px, 7vw, 108px) 30px;
+            isolation: isolate;
+            overflow: hidden;
+            transition: opacity .48s ease, transform .65s cubic-bezier(.22, 1, .36, 1), filter .48s ease;
+        }
+
+        .start-page::before,
+        .start-page::after {
+            content: '';
+            position: absolute;
+            z-index: -1;
+            border: 1px solid rgba(66, 211, 210, .18);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .start-page::before { width: 620px; height: 620px; top: -290px; right: -150px; box-shadow: 0 0 0 36px rgba(66, 211, 210, .035), 0 0 0 72px rgba(66, 211, 210, .025); animation: background-ring 30s linear infinite; }
+        .start-page::after { width: 420px; height: 420px; bottom: -260px; left: -170px; border-color: rgba(242, 143, 109, .18); animation: background-ring-reverse 23s linear infinite; }
+
+        .space-field { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+        .space-star { position: absolute; width: var(--star-size, 3px); height: var(--star-size, 3px); top: var(--star-top); left: var(--star-left); background: var(--star-color, #effbfa); border-radius: 50%; opacity: .3; box-shadow: 0 0 9px var(--star-color, #effbfa); animation: star-float var(--star-speed, 5s) ease-in-out var(--star-delay, 0s) infinite alternate; }
+        .space-star:nth-child(2n) { width: 2px; height: 2px; }
+        .space-star:nth-child(3n) { opacity: .55; }
+        .space-star:nth-child(4n) { --star-color: #42d3d2; }
+        .space-star:nth-child(5n) { --star-color: #f28f6d; }
+        .start-topbar, .start-main, .start-footer { position: relative; z-index: 1; }
+
+        .start-topbar { display: flex; align-items: center; justify-content: space-between; animation: start-drop .7s ease both; }
+        .start-brand { display: flex; align-items: center; gap: 11px; color: var(--start-ink); font: 700 22px 'Space Grotesk', sans-serif; letter-spacing: .015em; }
+        .start-brand-mark { display: grid; width: 34px; height: 34px; place-items: center; color: #082632; background: var(--start-cyan); border-radius: 9px; box-shadow: 0 0 25px rgba(66, 211, 210, .27); }
+        .start-brand-mark svg { width: 18px; stroke-width: 2.8; }
+        .start-status { display: flex; align-items: center; gap: 8px; color: var(--start-muted); font-size: 11px; font-weight: 600; letter-spacing: .11em; text-transform: uppercase; }
+        .start-status-dot { width: 7px; height: 7px; background: var(--start-cyan); border-radius: 50%; box-shadow: 0 0 0 5px rgba(66, 211, 210, .12), 0 0 14px rgba(66, 211, 210, .7); }
+
+        .start-main { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); align-items: center; gap: clamp(44px, 9vw, 150px); max-width: 1080px; width: 100%; margin: 0 auto; padding: 60px 0; }
+        .start-copy { max-width: 590px; }
+        .start-kicker { display: flex; align-items: center; gap: 8px; margin: 0 0 18px; color: var(--start-cyan); font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+        .start-kicker svg { width: 16px; height: 16px; stroke-width: 1.8; filter: drop-shadow(0 0 7px rgba(66, 211, 210, .7)); animation: kicker-spark 2.6s ease-in-out infinite; }
+        .start-copy h1 { margin: 0; color: var(--start-ink); font: 700 clamp(45px, 7vw, 82px)/.96 'Space Grotesk', sans-serif; letter-spacing: -.065em !important; }
+        .start-copy h1 span { color: var(--start-cyan); }
+        .start-description { max-width: 480px; margin: 26px 0 34px; color: var(--start-muted); font-size: 16px; line-height: 1.65; }
+        .start-button {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 22px;
+            color: #06232e;
+            background: linear-gradient(135deg, #67e9e7 0%, #42d3d2 35%, #8fe1ea 100%);
+            border: 0;
+            border-radius: 11px;
+            box-shadow: 0 16px 30px rgba(66, 211, 210, .18), inset 0 1px 0 rgba(255,255,255,.45);
+            font: 700 12px 'DM Sans', sans-serif;
+            letter-spacing: .12em;
+            text-decoration: none;
+            overflow: hidden;
+            transition: transform .30s ease, box-shadow .30s ease, filter .30s ease;
+        }
+        .start-button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,.6) 50%, transparent 80%);
+            transform: translateX(-125%);
+            transition: transform .7s ease;
+        }
+        .start-button:hover {
+            color: #06232e;
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 20px 36px rgba(66, 211, 210, .24), inset 0 1px 0 rgba(255,255,255,.55);
+            filter: saturate(1.08);
+        }
+        .start-button:hover::before { transform: translateX(125%); }
+        .start-button svg { width: 17px; transition: transform .22s ease; }
+        .start-button:hover svg { transform: translateX(4px); }
+        .start-note { margin: 15px 0 0; color: rgba(169, 197, 200, .7); font-size: 11px; }
+
+        .start-visual { position: relative; min-height: 310px; animation: start-rise .8s .25s ease both; }
+        .start-visual::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(239, 251, 250, .72) 0 1px, transparent 1.5px), radial-gradient(circle, rgba(66, 211, 210, .6) 0 1px, transparent 1.5px); background-position: 18% 26%, 78% 68%; background-size: 105px 88px, 137px 116px; opacity: .42; animation: space-twinkle 4s ease-in-out infinite alternate; }
+        .orbit { position: absolute; inset: 20px; border: 1px solid rgba(66, 211, 210, .22); border-radius: 50%; transform: rotate(-22deg); animation: orbit-drift 18s linear infinite; }
+        .orbit::before { content: ''; position: absolute; top: -5px; left: 27%; width: 9px; height: 9px; background: var(--start-coral); border-radius: 50%; box-shadow: 0 0 18px rgba(242, 143, 109, .75); }
+        .orbit.two { inset: 58px -5px; transform: rotate(34deg); border-color: rgba(242, 143, 109, .2); animation: orbit-drift-reverse 25s linear infinite; }
+        .orbit.two::before { top: auto; right: 24%; bottom: -5px; left: auto; width: 6px; height: 6px; background: var(--start-cyan); box-shadow: 0 0 15px rgba(66, 211, 210, .8); }
+        .start-core { position: absolute; top: 50%; left: 50%; display: grid; width: 142px; height: 142px; place-items: center; transform: translate(-50%, -50%); color: var(--start-cyan); background: rgba(12, 57, 66, .75); border: 1px solid rgba(66, 211, 210, .56); border-radius: 35px; box-shadow: 0 0 0 13px rgba(66, 211, 210, .045), 0 20px 50px rgba(0, 0, 0, .25); animation: core-pulse 4s ease-in-out infinite; }
+        .start-core svg { width: 62px; height: 62px; stroke-width: 1.2; }
+        .start-label { position: absolute; right: 0; bottom: 28px; color: var(--start-muted); font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+        .start-label::before { content: ''; display: inline-block; width: 24px; margin: 0 9px 3px 0; border-top: 1px solid var(--start-coral); }
+        .start-footer { display: flex; justify-content: space-between; gap: 20px; color: rgba(169, 197, 200, .68); font-size: 10px; animation: start-rise .8s .4s ease both; }
+        .start-footer strong { color: var(--start-ink); font-weight: 600; }
+
+        .system-curtain {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            visibility: hidden;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0;
+            background:
+                radial-gradient(circle at 50% 46%, rgba(66, 211, 210, .16), transparent 29%),
+                linear-gradient(145deg, #092a35 0%, #071c25 58%, #0b2530 100%);
+            clip-path: circle(0 at 50% 50%);
+            backdrop-filter: blur(0);
+            transition: clip-path .68s cubic-bezier(.22, 1, .36, 1), opacity .22s ease, backdrop-filter .55s ease, visibility 0s linear .72s;
+        }
+        .system-curtain::before {
+            content: '';
+            position: absolute;
+            inset: -18%;
+            background-image:
+                radial-gradient(circle at 28% 32%, rgba(66, 211, 210, .7) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 72% 68%, rgba(242, 143, 109, .55) 0 1px, transparent 1.5px);
+            background-size: 170px 140px, 210px 180px;
+            opacity: 0;
+            transform: scale(.88) rotate(-2deg);
+            transition: opacity .4s ease .16s, transform .7s cubic-bezier(.22, 1, .36, 1) .08s;
+        }
+        .curtain-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 1;
+            width: 220px;
+            height: 220px;
+            transform: translate(-50%, -50%) scale(.55);
+            border: 1px solid rgba(66, 211, 210, .5);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 70px rgba(66, 211, 210, .2), inset 0 0 45px rgba(66, 211, 210, .1);
+            transition: opacity .32s ease .18s, transform .6s cubic-bezier(.22, 1, .36, 1) .14s;
+        }
+        .curtain-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 2;
+            display: grid;
+            gap: 13px;
+            justify-items: center;
+            transform: translate(-50%, -50%) translateY(14px) scale(.98);
+            color: var(--start-ink);
+            opacity: 0;
+            transition: opacity .3s ease .24s, transform .45s cubic-bezier(.22, 1, .36, 1) .22s;
+        }
+        .curtain-message strong { color: var(--start-cyan); font: 700 13px 'Space Grotesk', sans-serif; letter-spacing: .19em; text-transform: uppercase; }
+        .curtain-message span { color: var(--start-muted); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+        .curtain-loader {
+            width: 38px;
+            height: 38px;
+            border: 2px solid rgba(66, 211, 210, .18);
+            border-top-color: var(--start-cyan);
+            border-right-color: rgba(242, 143, 109, .8);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(66, 211, 210, .25);
+            animation: curtain-spin 1s linear infinite;
+        }
+        body.system-starting .system-curtain { visibility: visible; opacity: 1; clip-path: circle(150vmax at 50% 50%); backdrop-filter: blur(7px); transition-delay: 0s; }
+        body.system-starting .system-curtain::before { opacity: .72; transform: scale(1) rotate(0); }
+        body.system-starting .curtain-glow { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        body.system-starting .curtain-message { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1); }
+        body.system-starting .start-page { opacity: .14; transform: scale(.985); filter: blur(4px); }
+        body.system-starting .start-button { pointer-events: none; }
+
+        @keyframes start-drop { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes start-rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes curtain-spin { to { transform: rotate(360deg); } }
+        @keyframes orbit-drift { from { transform: rotate(-22deg) scale(.98); } to { transform: rotate(338deg) scale(1.02); } }
+        @keyframes orbit-drift-reverse { from { transform: rotate(34deg); } to { transform: rotate(-326deg); } }
+        @keyframes core-pulse { 50% { box-shadow: 0 0 0 19px rgba(66, 211, 210, .035), 0 20px 50px rgba(0, 0, 0, .25); } }
+        @keyframes space-twinkle { from { opacity: .2; transform: scale(.98); } to { opacity: .58; transform: scale(1.02); } }
+        @keyframes star-float { from { opacity: .18; transform: translate3d(0, 3px, 0) scale(.72); } to { opacity: .78; transform: translate3d(0, -5px, 0) scale(1.15); } }
+        @keyframes background-ring { from { transform: rotate(0deg); opacity: .72; } 50% { opacity: 1; } to { transform: rotate(360deg); opacity: .72; } }
+        @keyframes background-ring-reverse { from { transform: rotate(360deg); opacity: .62; } 50% { opacity: 1; } to { transform: rotate(0deg); opacity: .62; } }
+        @keyframes kicker-spark { 50% { transform: rotate(12deg) scale(1.12); opacity: .72; } }
+        @media (max-width: 700px) {
+            .start-page { padding: 24px 20px 24px; }
+            .start-status { font-size: 0; }
+            .start-status-dot { width: 8px; height: 8px; }
+            .start-main { display: flex; flex-direction: column; align-items: stretch; gap: 20px; padding: 48px 0 30px; }
+            .start-copy h1 { font-size: clamp(44px, 14vw, 68px); }
+            .start-description { font-size: 14px; }
+            .start-visual { min-height: 230px; order: -1; }
+            .orbit { inset: 16px 18%; }
+            .orbit.two { inset: 40px 5%; }
+            .start-core { width: 106px; height: 106px; border-radius: 27px; }
+            .start-core svg { width: 47px; height: 47px; }
+            .start-label { right: 5%; bottom: 0; }
+            .start-footer { flex-direction: column; gap: 6px; }
+        }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+    </style>
+</head>
+<body>
+    <div class="system-curtain" aria-hidden="true"><div class="curtain-glow"></div><div class="curtain-message"><div class="curtain-loader"></div><strong>Iniciando sistema</strong><span>Conectando sua operação</span></div></div>
+    <main class="start-page">
+        <div class="space-field" aria-hidden="true"><span class="space-star" style="--star-top: 12%; --star-left: 8%; --star-delay: .2s"></span><span class="space-star" style="--star-top: 24%; --star-left: 42%; --star-speed: 6s; --star-delay: 1.2s"></span><span class="space-star" style="--star-top: 8%; --star-left: 67%; --star-size: 4px; --star-speed: 4s; --star-delay: .8s"></span><span class="space-star" style="--star-top: 36%; --star-left: 91%; --star-delay: 2s"></span><span class="space-star" style="--star-top: 55%; --star-left: 6%; --star-speed: 7s; --star-delay: .5s"></span><span class="space-star" style="--star-top: 72%; --star-left: 32%; --star-delay: 1.8s"></span><span class="space-star" style="--star-top: 86%; --star-left: 72%; --star-size: 4px; --star-speed: 6s; --star-delay: 2.4s"></span><span class="space-star" style="--star-top: 64%; --star-left: 96%; --star-delay: 1s"></span><span class="space-star" style="--star-top: 91%; --star-left: 15%; --star-speed: 4s; --star-delay: 2.2s"></span><span class="space-star" style="--star-top: 44%; --star-left: 52%; --star-delay: .9s"></span></div>
+        <header class="start-topbar">
+            <div class="start-brand"><span class="start-brand-mark"><i data-lucide="network"></i></span>NEXUS OPS</div>
+            <div class="start-status"><span class="start-status-dot"></span>Sistema operacional</div>
+        </header>
+        <section class="start-main" aria-labelledby="start-title">
+            <div class="start-copy">
+                <p class="start-kicker"><i data-lucide="sparkles"></i> Plataforma de operações</p>
+                <h1 id="start-title">Tudo conectado.<br><span>Seu controle começa aqui.</span></h1>
+                <p class="start-description">Uma visão inteligente para acompanhar ativos, pedidos, produção e entregas em um único lugar.</p>
+                <a class="start-button" id="start-system" href="login.html">ACESSAR SISTEMA <i data-lucide="log-in"></i></a>
+                <p class="start-note">Entre com seu perfil de acesso</p>
+            </div>
+            <div class="start-visual" aria-hidden="true">
+                <div class="orbit"></div>
+                <div class="orbit two"></div>
+                <div class="start-core"><i data-lucide="network"></i></div>
+                <span class="start-label">Operação em movimento</span>
+            </div>
+        </section>
+        <footer class="start-footer"><span><strong>NEXUS OPS</strong> · Tecnologia para operações conectadas</span><span>Volta Redonda, RJ · 2026</span></footer>
+    </main>
+    <script>
+        lucide.createIcons();
+        document.getElementById('start-system').addEventListener('click', function (event) {
+            event.preventDefault();
+            document.body.classList.add('system-starting');
+            document.body.style.cursor = 'wait';
+            var transitionDelay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 120 : 880;
+            window.setTimeout(function () { window.location.replace('login.html'); }, transitionDelay);
+        });
+    </script>
+</body>
+</html>

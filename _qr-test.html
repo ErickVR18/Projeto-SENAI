@@ -1,0 +1,79 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Teste de integração QR</title>
+<pre id="result">RUNNING</pre>
+<iframe id="target" title="Inventário" width="1200" height="900"></iframe>
+<script>
+(async function () {
+    var output = document.getElementById('result');
+    var frame = document.getElementById('target');
+    var failures = [];
+    var backup = localStorage.getItem('office-devices');
+    var authBackup = localStorage.getItem('nexus-ops-auth');
+    function assert(value, message) { if (!value) failures.push(message); }
+    function load(url) { return new Promise(function (resolve) { frame.onload = resolve; frame.src = url; }); }
+    try {
+        localStorage.setItem('office-devices', '[]');
+        localStorage.setItem('nexus-ops-auth', JSON.stringify({id:'central', role:'admin', name:'Teste', home:'index.html', expiresAt:Date.now()+3600000}));
+        for (var number = 1; number <= 3; number++) {
+            var code = 'FREEZER-00' + number;
+            var aliases = ['https://www.canvaqr.com/RGWxElei8e', 'https://www.canvaqr.com/RGWxEcRmzC', 'https://www.canvaqr.com/RGWxDtKWVm'];
+            var alias = aliases[number - 1];
+            await load('aparelhos.html?freezer=' + code);
+            var win = frame.contentWindow, doc = frame.contentDocument;
+            var form = doc.getElementById('device-form');
+            assert(win.NexusQrScanner.extractAssetCode('https://erickvr18.github.io/Projeto-Integrador-SENAI/?freezer='+code) === code, 'Extração: '+code);
+            if (number < 3) {
+                var stored = JSON.parse(localStorage.getItem('office-devices'));
+                assert(stored.filter(function(d) { return d.id === code; }).length === 1, 'Freezer pré-cadastrado: '+code);
+                if (number === 1) {
+                    assert(doc.getElementById('modal').classList.contains('open') && form.elements.id.value === code, 'Detalhes do FREEZER-001');
+                    assert(doc.getElementById('modal-title').textContent === 'Editar ativo', 'FREEZER-001 já cadastrado');
+                    doc.getElementById('close-modal').click();
+                    win.handleScannedCode(alias);
+                    assert(doc.getElementById('modal').classList.contains('open'), 'Etiqueta do FREEZER-001 abre detalhes');
+                } else {
+                    assert(doc.getElementById('history-modal').classList.contains('open'), 'Histórico do FREEZER-002');
+                    assert(doc.getElementById('history-list').textContent.indexOf('02/11/2026') !== -1, 'Manutenção recente do FREEZER-002');
+                    assert(doc.getElementById('history-list').textContent.indexOf('liberado para uso') !== -1, 'Resultado da manutenção');
+                    doc.getElementById('close-history').click();
+                    win.handleScannedCode(alias);
+                    assert(doc.getElementById('history-modal').classList.contains('open'), 'Etiqueta do FREEZER-002 abre histórico');
+                }
+                continue;
+            }
+            assert(doc.getElementById('modal').classList.contains('open'), 'Cadastro automático: '+code);
+            assert(form.elements.id.value === code, 'Identificação: '+code);
+            assert(win.NexusQrScanner.extractAssetCode(alias) === code, 'Identificação da etiqueta Canva: '+code);
+            assert(win.NexusQrScanner.extractAssetCode(alias + '/') === code, 'Etiqueta com barra final: '+code);
+            doc.getElementById('close-modal').click();
+            win.handleScannedCode(alias);
+            assert(doc.getElementById('modal').classList.contains('open') && form.elements.id.value === code, 'Cadastro pela etiqueta Canva: '+code);
+            assert(win.NexusQrScanner.extractAssetCode('https://outro.example/' + alias.split('/').pop()) !== code, 'Não aceitar domínio diferente');
+            form.elements.client.value = 'Cliente de teste';
+            form.elements.location.value = 'SENAI';
+            form.elements.maintenance.value = '2026-11-03';
+            form.dispatchEvent(new win.Event('submit', {bubbles:true, cancelable:true}));
+            var saved = JSON.parse(localStorage.getItem('office-devices'));
+            assert(saved.filter(function(d) {return d.id === code;}).length === 1, 'Persistência sem duplicação: '+code);
+            await load('aparelhos.html?freezer='+code);
+            win = frame.contentWindow; doc = frame.contentDocument;
+            assert(doc.getElementById('modal').classList.contains('open') && doc.getElementById('modal-title').textContent === 'Editar ativo', 'Dispositivo salvo abre detalhes: '+code);
+            assert(doc.getElementById('device-form').elements.id.value === code, 'Dispositivo salvo mantém identificação');
+            doc.getElementById('close-history').click();
+            win.handleScannedCode(alias);
+            assert(doc.getElementById('modal').classList.contains('open'), 'Leitura pela câmera: '+code);
+        }
+        await load('index.html?freezer=FREEZER-001');
+        assert(frame.contentWindow.location.pathname.endsWith('/aparelhos.html'), 'Roteamento da página inicial');
+        assert(frame.contentDocument.getElementById('modal').classList.contains('open'), 'Detalhes após roteamento');
+        await load('aparelhos.html?freezer=INVALIDO');
+        assert(!frame.contentDocument.getElementById('modal').classList.contains('open'), 'Rejeição de parâmetro inválido');
+        output.textContent = failures.length ? 'FAIL:\n'+failures.join('\n') : 'PASS: três freezers, cadastro, persistência, histórico, leitura, roteamento e parâmetro inválido.';
+    } catch (error) { output.textContent = 'FAIL: '+error.stack; }
+    finally {
+        if (backup === null) localStorage.removeItem('office-devices'); else localStorage.setItem('office-devices', backup);
+        if (authBackup === null) localStorage.removeItem('nexus-ops-auth'); else localStorage.setItem('nexus-ops-auth', authBackup);
+    }
+})();
+</script>
