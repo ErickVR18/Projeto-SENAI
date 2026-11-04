@@ -26,19 +26,21 @@
             if (number < 3) {
                 var stored = JSON.parse(localStorage.getItem('office-devices'));
                 assert(stored.filter(function(d) { return d.id === code; }).length === 1, 'Freezer pré-cadastrado: '+code);
+                assert(doc.getElementById('history-modal').classList.contains('open'), 'Detalhes e histórico abertos: '+code);
+                assert(doc.getElementById('history-device-id').textContent === code, 'Identidade exibida: '+code);
                 if (number === 1) {
-                    assert(doc.getElementById('modal').classList.contains('open') && form.elements.id.value === code, 'Detalhes do FREEZER-001');
-                    assert(doc.getElementById('modal-title').textContent === 'Editar ativo', 'FREEZER-001 já cadastrado');
-                    doc.getElementById('close-modal').click();
+                    assert(doc.getElementById('history-device-name').textContent === 'Freezer #001', 'Nome do FREEZER-001');
+                    assert(doc.getElementById('history-list').textContent.indexOf('Nenhum registro de manutenção') !== -1, 'Histórico vazio do FREEZER-001 exibido junto aos detalhes');
+                    doc.getElementById('close-history').click();
                     win.handleScannedCode(alias);
-                    assert(doc.getElementById('modal').classList.contains('open'), 'Etiqueta do FREEZER-001 abre detalhes');
+                    assert(doc.getElementById('history-modal').classList.contains('open') && doc.getElementById('history-device-id').textContent === code, 'Etiqueta do FREEZER-001 abre detalhes e histórico');
                 } else {
-                    assert(doc.getElementById('history-modal').classList.contains('open'), 'Histórico do FREEZER-002');
+                    assert(doc.getElementById('history-device-name').textContent === 'Freezer #002', 'Nome do FREEZER-002');
                     assert(doc.getElementById('history-list').textContent.indexOf('02/11/2026') !== -1, 'Manutenção recente do FREEZER-002');
                     assert(doc.getElementById('history-list').textContent.indexOf('liberado para uso') !== -1, 'Resultado da manutenção');
                     doc.getElementById('close-history').click();
                     win.handleScannedCode(alias);
-                    assert(doc.getElementById('history-modal').classList.contains('open'), 'Etiqueta do FREEZER-002 abre histórico');
+                    assert(doc.getElementById('history-modal').classList.contains('open') && doc.getElementById('history-device-id').textContent === code, 'Etiqueta do FREEZER-002 abre detalhes e histórico');
                 }
                 continue;
             }
@@ -58,17 +60,16 @@
             assert(saved.filter(function(d) {return d.id === code;}).length === 1, 'Persistência sem duplicação: '+code);
             await load('aparelhos.html?freezer='+code);
             win = frame.contentWindow; doc = frame.contentDocument;
-            assert(doc.getElementById('modal').classList.contains('open') && doc.getElementById('modal-title').textContent === 'Editar ativo', 'Dispositivo salvo abre detalhes: '+code);
-            assert(doc.getElementById('device-form').elements.id.value === code, 'Dispositivo salvo mantém identificação');
+            assert(doc.getElementById('history-modal').classList.contains('open') && doc.getElementById('history-device-id').textContent === code, 'Dispositivo salvo abre detalhes e histórico: '+code);
             doc.getElementById('close-history').click();
             win.handleScannedCode(alias);
-            assert(doc.getElementById('modal').classList.contains('open'), 'Leitura pela câmera: '+code);
+            assert(doc.getElementById('history-modal').classList.contains('open') && doc.getElementById('history-device-id').textContent === code, 'Leitura pela câmera: '+code);
         }
         await load('index.html?freezer=FREEZER-001');
         assert(frame.contentWindow.location.pathname.endsWith('/aparelhos.html'), 'Roteamento da página inicial');
-        assert(frame.contentDocument.getElementById('modal').classList.contains('open'), 'Detalhes após roteamento');
+        assert(frame.contentDocument.getElementById('history-modal').classList.contains('open'), 'Detalhes e histórico após roteamento');
         await load('aparelhos.html?freezer=INVALIDO');
-        assert(!frame.contentDocument.getElementById('modal').classList.contains('open'), 'Rejeição de parâmetro inválido');
+        assert(!frame.contentDocument.getElementById('modal').classList.contains('open') && !frame.contentDocument.getElementById('history-modal').classList.contains('open'), 'Rejeição de parâmetro inválido');
         output.textContent = failures.length ? 'FAIL:\n'+failures.join('\n') : 'PASS: três freezers, cadastro, persistência, histórico, leitura, roteamento e parâmetro inválido.';
     } catch (error) { output.textContent = 'FAIL: '+error.stack; }
     finally {

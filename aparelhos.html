@@ -88,9 +88,9 @@
         .status-updated { animation: status-pulse .55s ease; }
         html.dark-theme .status-select { background: #102a39; }
         .empty { display: none; padding: 40px; color: var(--muted); text-align: center; grid-column: 1 / -1; }
-        .modal { display: none; position: fixed; inset: 0; place-items: center; padding: 20px; background: rgba(17, 40, 60, .25); z-index: 2; }
+        .modal { display: none; position: fixed; inset: 0; place-items: center; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 20px; background: rgba(17, 40, 60, .25); z-index: 2; }
         .modal.open { display: grid; }
-        .modal-box { width: min(100%, 420px); padding: 24px; background: #fff; border-radius: 16px; box-shadow: 0 22px 50px rgba(17,40,60,.2); }
+        .modal-box { width: min(100%, 420px); max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 24px; background: #fff; border-radius: 16px; box-shadow: 0 22px 50px rgba(17,40,60,.2); }
         html.dark-theme .modal-box { background: #173343; }
         .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; } .modal-head h2 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 22px; }
         .close { color: var(--muted); background: transparent; border: 0; cursor: pointer; } .close svg { width: 19px; }
@@ -106,14 +106,36 @@
         .toast span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
         html.dark-theme .toast { background: rgba(23, 51, 67, .96); border-color: rgba(157, 201, 222, .25); }
         /* History modal */
-        .history-modal { display: none; position: fixed; inset: 0; z-index: 3; place-items: center; padding: 20px; background: rgba(9, 31, 42, .46); backdrop-filter: blur(5px); }
-        .history-modal.open { display: grid; }
-        .history-box { width: min(100%, 460px); padding: 22px; color: var(--ink); background: #fff; border: 1px solid rgba(255,255,255,.78); border-radius: 14px; box-shadow: 0 24px 60px rgba(8,39,52,.25); }
+        .history-modal { display: none; position: fixed; inset: 0; z-index: 3; place-items: center; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 20px; background: rgba(9, 31, 42, .46); backdrop-filter: blur(5px); }
+        .history-modal.open { display: grid; animation: qr-overlay-enter .24s ease-out both; }
+        .history-box { width: min(100%, 560px); max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 22px; color: var(--ink); background: #fff; border: 1px solid rgba(255,255,255,.78); border-radius: 14px; box-shadow: 0 24px 60px rgba(8,39,52,.25); }
+        .history-modal.open .history-box { animation: qr-detail-enter .38s cubic-bezier(.2,.8,.2,1) both; transform-origin: center; will-change: transform, opacity; }
         html.dark-theme .history-box { background: #173343; }
         .history-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
         .history-head h2 { margin: 0; font: 600 18px 'Space Grotesk',sans-serif; }
         .history-close { color: var(--muted); background: transparent; border: 0; cursor: pointer; }
         .history-close svg { width: 18px; }
+        .asset-detail-summary { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; margin-bottom: 20px; padding: 16px; background: linear-gradient(120deg, #edf9fc, #f7fbfd); border: 1px solid #d8edf3; border-radius: 11px; }
+        .history-modal.open .asset-detail-summary { animation: qr-detail-content .3s .06s ease-out both; }
+        html.dark-theme .asset-detail-summary { background: linear-gradient(120deg, #123447, #173343); border-color: rgba(120,196,224,.2); }
+        .asset-detail-identity span, .asset-detail-identity small { display: block; color: var(--muted); font-size: 10px; }
+        .asset-detail-identity strong { display: block; margin: 4px 0; color: var(--ink); font: 600 18px 'Space Grotesk',sans-serif; }
+        .asset-detail-status { padding: 6px 9px; color: #167451; background: #e3f7ed; border-radius: 999px; font-size: 9px; font-weight: 700; }
+        .asset-detail-status.attention { color: #94600b; background: #fff3d4; }
+        .asset-detail-status.offline { color: #a53d36; background: #fde9e7; }
+        html.dark-theme .asset-detail-status { color: #8ce0b7; background: rgba(39,155,105,.17); }
+        html.dark-theme .asset-detail-status.attention { color: #ffd27b; background: rgba(196,139,32,.18); }
+        html.dark-theme .asset-detail-status.offline { color: #ffaaa3; background: rgba(181,82,69,.2); }
+        .asset-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+        .history-modal.open .asset-detail-grid { animation: qr-detail-content .3s .1s ease-out both; }
+        .asset-detail-grid > div { min-width: 0; padding: 11px 12px; background: #f5f9fb; border-radius: 9px; }
+        html.dark-theme .asset-detail-grid > div { background: #102a39; }
+        .asset-detail-grid span { display: block; margin-bottom: 4px; color: var(--muted); font-size: 9px; }
+        .asset-detail-grid strong { display: block; overflow-wrap: anywhere; color: var(--ink); font-size: 11px; }
+        .asset-detail-notes { margin: 0 0 19px; padding: 11px 12px; color: var(--muted); background: #f5f9fb; border-left: 3px solid #55bcdd; border-radius: 4px 9px 9px 4px; font-size: 11px; line-height: 1.5; }
+        .history-modal.open .asset-detail-notes, .history-modal.open .history-section-title, .history-modal.open .history-list { animation: qr-detail-content .3s .14s ease-out both; }
+        html.dark-theme .asset-detail-notes { background: #102a39; }
+        .history-section-title { margin: 0 0 10px; color: var(--ink); font: 600 13px 'Space Grotesk',sans-serif; }
         .history-list { display: grid; gap: 11px; }
         .history-item { display: flex; align-items: start; justify-content: space-between; gap: 12px; padding: 12px; background: #f1f8fa; border-radius: 9px; }
         html.dark-theme .history-item { background: #102a39; }
@@ -129,7 +151,7 @@
         html.dark-theme .scan-button:hover { color: #d0f1fd; background: #1b4256; border-color: rgba(140, 214, 240, .55); }
         @media (max-width: 780px) { .page-shell { padding: 24px 18px 38px; } .content { margin-top: 55px; } .heading { display: block; } .heading-copy { margin-top: 18px; } .toolbar { align-items: start; flex-direction: column; } .device-grid { grid-template-columns: 1fr; } }
         @media (max-width: 780px) { .site-footer { margin-top: 65px; } .footer-grid { grid-template-columns: 1fr; gap: 24px; } .footer-bottom { flex-direction: column; gap: 6px; } }
-        @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } } @keyframes fade-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } } @keyframes card-rise { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } } @keyframes status-pulse { 50% { box-shadow: 0 0 0 4px rgba(33, 182, 220, .2); } } .content { animation: rise .55s ease both; }
+        @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } } @keyframes fade-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } } @keyframes card-rise { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } } @keyframes status-pulse { 50% { box-shadow: 0 0 0 4px rgba(33, 182, 220, .2); } } @keyframes qr-overlay-enter { from { opacity: 0; } to { opacity: 1; } } @keyframes qr-detail-enter { from { opacity: 0; transform: translateY(16px) scale(.975); } to { opacity: 1; transform: translateY(0) scale(1); } } @keyframes qr-detail-content { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } } .content { animation: rise .55s ease both; }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
     </style>
     <link rel="stylesheet" href="qr-scanner.css">
@@ -154,7 +176,7 @@
     </main>
     <div class="toast" id="toast" role="status" aria-live="polite"><i data-lucide="check-circle-2"></i><div><strong id="toast-title"></strong><span id="toast-message"></span></div></div>
     <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><form class="modal-box" id="device-form"><div class="modal-head"><h2 id="modal-title">Novo ativo</h2><button class="close" type="button" id="close-modal" aria-label="Fechar"><i data-lucide="x"></i></button></div><label>Código do dispositivo<input name="id" readonly placeholder="Gerado ao salvar ou preenchido pelo QR Code"></label><label>Nome do ativo<input name="name" placeholder="Ex.: Freezer #046" required></label><label>Cliente responsável<input name="client" placeholder="Ex.: Supermercado XYZ" required></label><label>Localização<input name="location" placeholder="Ex.: Volta Redonda, RJ" required></label><label>Última manutenção<input name="maintenance" type="date" required></label><label>Temperatura / condição<input name="temperature" placeholder="Ex.: -18 °C"></label><label>Informações adicionais <span>(opcional)</span><textarea name="notes" rows="3" placeholder="Ex.: Número de série, observações ou detalhes importantes"></textarea></label><label>Status<select name="status"><option value="online">Funcionando</option><option value="attention">Atenção</option><option value="offline">Offline</option></select></label><button class="save" type="submit">SALVAR ATIVO</button></form></div>
-    <div class="history-modal" id="history-modal" role="dialog" aria-modal="true" aria-labelledby="history-title"><div class="history-box"><div class="history-head"><h2 id="history-title">Histórico de manutenção</h2><button class="history-close" id="close-history" type="button" aria-label="Fechar histórico"><i data-lucide="x"></i></button></div><div class="history-list" id="history-list"></div></div></div>
+    <div class="history-modal" id="history-modal" role="dialog" aria-modal="true" aria-labelledby="history-title"><div class="history-box"><div class="history-head"><h2 id="history-title">Detalhes do ativo</h2><button class="history-close" id="close-history" type="button" aria-label="Fechar detalhes e histórico"><i data-lucide="x"></i></button></div><div class="asset-detail-summary"><div class="asset-detail-identity"><span>ATIVO IDENTIFICADO</span><strong id="history-device-name">--</strong><small id="history-device-id">--</small></div><span class="asset-detail-status" id="history-device-status">--</span></div><div class="asset-detail-grid"><div><span>Cliente responsável</span><strong id="history-device-client">--</strong></div><div><span>Localização</span><strong id="history-device-location">--</strong></div><div><span>Temperatura / condição</span><strong id="history-device-temperature">--</strong></div><div><span>Última manutenção</span><strong id="history-device-maintenance">--</strong></div></div><p class="asset-detail-notes" id="history-device-notes" hidden></p><h3 class="history-section-title">Histórico de manutenção</h3><div class="history-list" id="history-list"></div></div></div>
     <div class="scanner-modal" id="scanner-modal" role="dialog" aria-modal="true" aria-labelledby="scanner-title" aria-describedby="scanner-status">
         <div class="scanner-box">
             <div class="scanner-head">
@@ -211,7 +233,50 @@
         var toastTimer;
         function showToast(title, message, type) { toast.className = 'toast show' + (type ? ' ' + type : ''); document.getElementById('toast-title').textContent = title; document.getElementById('toast-message').textContent = message; window.clearTimeout(toastTimer); toastTimer = window.setTimeout(function () { toast.classList.remove('show'); }, 3600); }
         function openDeviceModal(device) { deviceForm.reset(); deviceForm.elements.id.value = device ? device.id : ''; deviceForm.elements.name.value = device ? device.name : ''; deviceForm.elements.client.value = device ? device.client : ''; deviceForm.elements.location.value = device ? device.location : ''; deviceForm.elements.maintenance.value = device && device.maintenance.indexOf('/') > -1 ? device.maintenance.split('/').reverse().join('-') : ''; deviceForm.elements.temperature.value = device ? device.temperature || '' : ''; deviceForm.elements.notes.value = device ? device.notes || '' : ''; deviceForm.elements.status.value = device ? device.status : 'online'; document.getElementById('modal-title').textContent = device ? 'Editar ativo' : 'Novo ativo'; document.querySelector('.save').textContent = device ? 'SALVAR ALTERAÇÕES' : 'SALVAR ATIVO'; modal.classList.add('open'); }
-        function openHistoryModal(device) { var historyList = document.getElementById('history-list'); document.getElementById('history-title').textContent = 'Histórico · ' + device.name; if (device.maintenanceHistory && device.maintenanceHistory.length) { historyList.innerHTML = device.maintenanceHistory.map(function (record) { return '<div class="history-item"><div><strong>' + record.date + '</strong><span>' + record.description + '</span></div><small>' + record.technician + '</small></div>'; }).join(''); } else { historyList.innerHTML = '<p class="history-empty">Nenhum registro de manutenção.</p>'; } document.getElementById('history-modal').classList.add('open'); }
+        function openHistoryModal(device) {
+            var historyList = document.getElementById('history-list');
+            var statusLabels = { online: 'FUNCIONANDO', attention: 'ATENÇÃO', offline: 'OFFLINE' };
+            var status = device.status || 'online';
+            document.getElementById('history-title').textContent = 'Detalhes do ativo';
+            document.getElementById('history-device-name').textContent = device.name || 'Ativo sem nome';
+            document.getElementById('history-device-id').textContent = device.id || 'Sem código';
+            document.getElementById('history-device-client').textContent = device.client || 'Não informado';
+            document.getElementById('history-device-location').textContent = device.location || 'Não informada';
+            document.getElementById('history-device-temperature').textContent = device.temperature || 'Não informada';
+            document.getElementById('history-device-maintenance').textContent = device.maintenance || 'Não informada';
+            var statusBadge = document.getElementById('history-device-status');
+            statusBadge.textContent = statusLabels[status] || statusLabels.online;
+            statusBadge.className = 'asset-detail-status ' + status;
+            var notes = document.getElementById('history-device-notes');
+            notes.textContent = device.notes || '';
+            notes.hidden = !device.notes;
+            historyList.textContent = '';
+            var records = Array.isArray(device.maintenanceHistory) ? device.maintenanceHistory : [];
+            if (records.length) {
+                records.forEach(function (record) {
+                    var item = document.createElement('div');
+                    var body = document.createElement('div');
+                    var date = document.createElement('strong');
+                    var description = document.createElement('span');
+                    var technician = document.createElement('small');
+                    item.className = 'history-item';
+                    date.textContent = record.date || 'Data não informada';
+                    description.textContent = record.description || 'Sem descrição.';
+                    technician.textContent = record.technician || 'Responsável não informado';
+                    body.appendChild(date);
+                    body.appendChild(description);
+                    item.appendChild(body);
+                    item.appendChild(technician);
+                    historyList.appendChild(item);
+                });
+            } else {
+                var empty = document.createElement('p');
+                empty.className = 'history-empty';
+                empty.textContent = 'Nenhum registro de manutenção para este ativo.';
+                historyList.appendChild(empty);
+            }
+            document.getElementById('history-modal').classList.add('open');
+        }
         document.getElementById('close-modal').addEventListener('click', function () { modal.classList.remove('open'); });
         document.getElementById('open-modal').addEventListener('click', function () { openDeviceModal(); });
         document.getElementById('close-history').addEventListener('click', function () { document.getElementById('history-modal').classList.remove('open'); });
@@ -265,12 +330,11 @@
         }
         function showDeviceFromScan(device) {
             resetFilters();
-            if (device.maintenanceHistory && device.maintenanceHistory.length) openHistoryModal(device);
-            else openDeviceModal(device);
+            openHistoryModal(device);
             var card = document.querySelector('.device-card[data-id="' + device.id + '"]');
             if (card) {
                 card.classList.add('flash');
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
                 window.setTimeout(function () { card.classList.remove('flash'); }, 2600);
             }
             showToast('Ativo identificado', device.name + ' (' + device.id + ') aberto pelo QR Code.');
